@@ -1,0 +1,47 @@
+{
+  "name": "emboss-lab",
+  "version": "0.1.8",
+  "description": "Emboss Lab desktop app.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win portable",
+    "build:mac": "electron-builder --mac dmg zip",
+    "license:keygen": "node license/create-keypair.js",
+    "license:generate": "node license/generate-license.js",
+    "license:admin": "electron license/admin-main.js"
+  },
+  "build": {
+    "appId": "cc.embosslab.app",
+    "productName": "Emboss Lab",
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "assets/**/*",
+      "icon/icon.ico",
+      "icon/icon.png",
+      "license/public-key.pem"
+    ],
+    "win": {
+      "icon": "icon/icon.ico",
+      "target": [
+        "portable"
+      ]
+    },
+    "mac": {
+      "icon": "icon/icon.png",
+      "category": "public.app-category.graphics-design",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  }
+}
