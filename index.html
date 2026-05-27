@@ -361,6 +361,29 @@ body.mosaic-mode .single-only{display:none}
         <input id="textureDetail" type="range" min="0" max="100" value="42">
       </section>
       <section class="group">
+        <h2 class="title">Finish</h2>
+        <div class="seg" id="finishPresets" style="margin-bottom:8px">
+          <button class="btn active" data-finish="natural" type="button">Natural</button>
+          <button class="btn" data-finish="crisp" type="button">Crisp</button>
+          <button class="btn" data-finish="gold" type="button">Warm Gold</button>
+          <button class="btn" data-finish="product" type="button">Product</button>
+        </div>
+        <div class="row"><label for="finishSaturation">Saturation</label><span class="value" id="finishSaturationVal"></span></div>
+        <input id="finishSaturation" type="range" min="60" max="180" value="100">
+        <div class="row"><label for="finishContrast">Final contrast</label><span class="value" id="finishContrastVal"></span></div>
+        <input id="finishContrast" type="range" min="60" max="180" value="100">
+        <div class="row"><label for="finishSharpness">Sharpness</label><span class="value" id="finishSharpnessVal"></span></div>
+        <input id="finishSharpness" type="range" min="0" max="100" value="0">
+        <div class="row"><label for="finishClarity">Clarity</label><span class="value" id="finishClarityVal"></span></div>
+        <input id="finishClarity" type="range" min="0" max="100" value="0">
+        <div class="row"><label for="finishHighlight">Highlight boost</label><span class="value" id="finishHighlightVal"></span></div>
+        <input id="finishHighlight" type="range" min="0" max="100" value="0">
+        <div class="row"><label for="finishBloom">Bloom</label><span class="value" id="finishBloomVal"></span></div>
+        <input id="finishBloom" type="range" min="0" max="100" value="0">
+        <div class="row"><label for="finishWarmth">Gold warmth</label><span class="value" id="finishWarmthVal"></span></div>
+        <input id="finishWarmth" type="range" min="-50" max="80" value="0">
+      </section>
+      <section class="group">
         <h2 class="title">Overlay</h2>
         <label class="upload">
           <input id="overlayFile" type="file" accept="image/png,image/webp,image/svg+xml">
@@ -482,7 +505,14 @@ body.mosaic-mode .single-only{display:none}
     composition:'single', mosaicCount:4,
     canvasRatio:'free', reliefScale:100, reliefX:0, reliefY:0,
     overlayOpacity:88, overlayScale:100, overlayX:0, overlayY:0,
+    finish:'natural', finishSaturation:100, finishContrast:100, finishSharpness:0, finishClarity:0, finishHighlight:0, finishBloom:0, finishWarmth:0,
     lang:localStorage.getItem('embossLabLang')||'en'
+  };
+  var finishPresets = {
+    natural:{finishSaturation:100,finishContrast:100,finishSharpness:0,finishClarity:0,finishHighlight:0,finishBloom:0,finishWarmth:0},
+    crisp:{finishSaturation:112,finishContrast:116,finishSharpness:34,finishClarity:22,finishHighlight:16,finishBloom:10,finishWarmth:4},
+    gold:{finishSaturation:122,finishContrast:118,finishSharpness:28,finishClarity:26,finishHighlight:34,finishBloom:24,finishWarmth:36},
+    product:{finishSaturation:116,finishContrast:124,finishSharpness:42,finishClarity:32,finishHighlight:24,finishBloom:16,finishWarmth:18}
   };
   var materials = {
     paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
@@ -505,6 +535,7 @@ body.mosaic-mode .single-only{display:none}
       composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Center Relief',single:'Single',mosaic:'Mosaic',shuffle:'Shuffle Grid',
       panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',
       material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
+      finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
       exportPng:'PNG',exportSweep:'Export Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
       help:'Help / 帮助',close:'Close',helpTitle:'Help / 帮助',
@@ -518,6 +549,7 @@ body.mosaic-mode .single-only{display:none}
       renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.'
     },
     zh:{
+      finish:'成片效果',finishSaturation:'饱和度',finishContrast:'最终对比度',finishSharpness:'锐度',finishClarity:'清晰度',finishHighlight:'高光增强',finishBloom:'辉光',finishWarmth:'金色暖度',
       eyebrow:'浮雕表面工具',brand:'把标志、手绘稿或黑白图像转换成可调光的浮雕表面。',
       image:'图像',upload:'上传图像',uploadHint:'透明 PNG 或灰度图效果最好。也可以直接拖入图片。',brightness:'亮度',alpha:'透明度',invert:'反转高度',
       relief:'浮雕',height:'高度',soft:'边缘柔化',contrast:'对比度',threshold:'底部裁切',bevel:'边缘膨胀',
@@ -557,7 +589,8 @@ body.mosaic-mode .single-only{display:none}
       ['.scroll .group:nth-of-type(3) .title','lighting'],['label[for="angle"]','angle'],['label[for="lightHeight"]','lightHeight'],['label[for="ambient"]','ambient'],['label[for="shine"]','shine'],['label[for="sweepDuration"]','sweepDuration'],
       ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],
       ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
-      ['.scroll .group:nth-of-type(6) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(6) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
+      ['.scroll .group:nth-of-type(6) .title','finish'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
+      ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
       ['#export','exportPng'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
       ['#licenseTitle','licenseTitle'],['#licenseModal .status','licenseText'],['#licenseEmailLabel','email'],['#licenseCodeLabel','licenseCode'],['#licenseActivate','activate'],['#licenseClear','clearLicense']
     ]);
@@ -594,7 +627,7 @@ body.mosaic-mode .single-only{display:none}
   function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null})}
   function clearTextureCache(){textureCache.key='';textureCache.canvas=null}
   function updateValues(){
-    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY'].forEach(function(id){
+    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
       var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+(id==='angle'?' deg':(id==='sweepDuration'?' s':''));
     });
     document.getElementById('base').value=state.base;
@@ -605,6 +638,7 @@ body.mosaic-mode .single-only{display:none}
     document.querySelectorAll('[data-source]').forEach(function(b){b.classList.toggle('active',b.dataset.source===state.source)});
     document.querySelectorAll('[data-composition]').forEach(function(b){b.classList.toggle('active',b.dataset.composition===state.composition)});
     document.querySelectorAll('[data-material]').forEach(function(b){b.classList.toggle('active',b.dataset.material===state.material)});
+    document.querySelectorAll('[data-finish]').forEach(function(b){b.classList.toggle('active',b.dataset.finish===state.finish)});
     document.body.classList.toggle('mosaic-mode',state.composition==='mosaic');
     document.getElementById('sweep').classList.toggle('active',state.sweep);
     document.getElementById('sweep').textContent=state.sweep?tr('stopSweep'):tr('previewSweep');
@@ -787,6 +821,54 @@ body.mosaic-mode .single-only{display:none}
       ctx.fillRect(noise(n,3)*target.width,noise(n,7)*target.height,1,1);
     }
     ctx.globalAlpha=1;
+  }
+  function applyFinish(ctx,target){
+    var sat=state.finishSaturation/100, con=state.finishContrast/100;
+    var sharp=state.finishSharpness/100, clarity=state.finishClarity/100, hi=state.finishHighlight/100, bloom=state.finishBloom/100, warm=state.finishWarmth/100;
+    if(Math.abs(sat-1)<.01&&Math.abs(con-1)<.01&&!sharp&&!clarity&&!hi&&!bloom&&Math.abs(warm)<.01) return;
+    var w=target.width,h=target.height,img=ctx.getImageData(0,0,w,h),d=img.data, blurData=null;
+    if(sharp||clarity){
+      var base=document.createElement('canvas'), bctx=base.getContext('2d');
+      base.width=w;base.height=h;bctx.putImageData(img,0,0);
+      var blur=document.createElement('canvas'), blurCtx=blur.getContext('2d');
+      blur.width=w;blur.height=h;
+      blurCtx.filter='blur('+Math.max(1,Math.round(Math.min(w,h)*.0025+clarity*2))+'px)';
+      blurCtx.drawImage(base,0,0);
+      blurData=blurCtx.getImageData(0,0,w,h).data;
+    }
+    var amount=sharp*1.25+clarity*.72;
+    for(var i=0;i<d.length;i+=4){
+      var r=d[i],g=d[i+1],b=d[i+2],lum=.299*r+.587*g+.114*b;
+      r=lum+(r-lum)*sat;g=lum+(g-lum)*sat;b=lum+(b-lum)*sat;
+      r=(r-128)*con+128;g=(g-128)*con+128;b=(b-128)*con+128;
+      if(hi){
+        var hmask=clamp((lum-132)/116,0,1)*hi;
+        r=mix(r,255,hmask*.42);g=mix(g,222,hmask*.34);b=mix(b,132,hmask*.18);
+      }
+      if(warm){r+=warm*18;g+=warm*8;b-=warm*14}
+      if(blurData){
+        var bl=.299*blurData[i]+.587*blurData[i+1]+.114*blurData[i+2], local=(lum-bl)*clarity*.34;
+        r+=(r-blurData[i])*amount+local;g+=(g-blurData[i+1])*amount+local;b+=(b-blurData[i+2])*amount+local;
+      }
+      d[i]=clamp(r,0,255);d[i+1]=clamp(g,0,255);d[i+2]=clamp(b,0,255);
+    }
+    ctx.putImageData(img,0,0);
+    if(bloom){
+      var glow=document.createElement('canvas'), gctx=glow.getContext('2d');
+      glow.width=w;glow.height=h;
+      var glowImg=ctx.getImageData(0,0,w,h), gd=glowImg.data;
+      for(var j=0;j<gd.length;j+=4){
+        var l=.299*gd[j]+.587*gd[j+1]+.114*gd[j+2], m=clamp((l-150)/105,0,1);
+        gd[j]=gd[j]*m;gd[j+1]=gd[j+1]*m;gd[j+2]=gd[j+2]*m;gd[j+3]=gd[j+3]*m*bloom*.72;
+      }
+      gctx.putImageData(glowImg,0,0);
+      ctx.save();
+      ctx.globalCompositeOperation='screen';
+      ctx.globalAlpha=.35+bloom*.55;
+      ctx.filter='blur('+Math.round(Math.min(w,h)*(.006+bloom*.012))+'px)';
+      ctx.drawImage(glow,0,0);
+      ctx.restore();
+    }
   }
   function smoothNoise(x,y){
     var xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
@@ -997,6 +1079,7 @@ body.mosaic-mode .single-only{display:none}
     materialTexture(ctx,board);
     if(state.composition==='mosaic') drawMosaicSeams(ctx,board,scale);
     grainCanvas(ctx,target);
+    applyFinish(ctx,target);
     if(target===preview) statsEl.textContent=board.w+' x '+board.h+' canvas';
   }
   function drawOverlay(ctx,target,w,h,x,y){
@@ -1210,7 +1293,13 @@ body.mosaic-mode .single-only{display:none}
     }
     requestAnimationFrame(frame);
   }
-  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
+  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
+  document.querySelectorAll('[data-finish]').forEach(function(b){b.addEventListener('click',function(){
+    state.finish=b.dataset.finish;
+    Object.assign(state,finishPresets[state.finish]||finishPresets.natural);
+    ['finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).value=state[id]});
+    updateValues();schedule();
+  })});
   ['base','back'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);schedule()})});
   document.getElementById('surfaceTexture').addEventListener('change',function(){
     state.texture=this.value;
