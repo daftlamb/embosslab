@@ -103,6 +103,7 @@ input[type=color]{padding:4px;cursor:pointer}
 }
 .btn:hover{border-color:#b59a85;background:#fff}
 .btn.active,.btn.primary{color:#fff8f1;background:var(--text);border-color:var(--text)}
+.btn:disabled{opacity:.6;cursor:wait}
 .btn.icon{display:flex;align-items:center;justify-content:center;gap:7px}
 .toggle{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font-size:12px}
 .toggle input{width:16px;height:16px;accent-color:var(--accent)}
@@ -180,6 +181,43 @@ body.mosaic-mode .single-only{display:none}
   font-size:11px;
   pointer-events:none;
 }
+.export-overlay{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(35,28,24,.22);
+  backdrop-filter:blur(2px);
+  pointer-events:none;
+}
+.export-overlay.open{display:flex}
+.export-card{
+  min-width:190px;
+  max-width:min(280px,80%);
+  display:grid;
+  justify-items:center;
+  gap:10px;
+  padding:16px 18px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:8px;
+  color:#fffaf5;
+  background:rgba(35,28,24,.82);
+  box-shadow:0 18px 45px rgba(35,28,24,.28);
+  text-align:center;
+}
+.export-spinner{
+  width:28px;
+  height:28px;
+  border:3px solid rgba(255,250,245,.32);
+  border-top-color:#fffaf5;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+.export-card strong{font-size:13px;font-weight:600}
+.export-card small{color:rgba(255,250,245,.76);font-size:11px;line-height:1.35}
+@keyframes spin{to{transform:rotate(360deg)}}
 .light-dot{
   position:absolute;
   width:18px;height:18px;margin:-9px;
@@ -429,6 +467,13 @@ body.mosaic-mode .single-only{display:none}
       <canvas id="preview"></canvas>
       <div class="light-dot" id="lightDot"></div>
       <div class="drop-hint">Drop a logo, drawing, or black-white image</div>
+      <div class="export-overlay" id="exportOverlay" aria-hidden="true">
+        <div class="export-card">
+          <span class="export-spinner"></span>
+          <strong id="exportOverlayTitle">Exporting PNG...</strong>
+          <small id="exportOverlayText">Large exports can take a moment.</small>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -546,7 +591,7 @@ body.mosaic-mode .single-only{display:none}
       overlayHelpTitle:'Overlay / 叠加',overlayHelpText:'Overlay keeps a PNG/WebP/SVG above the relief. Drag it on canvas, use mouse wheel or Scale to resize, Clear returns to Blank. 叠加图可拖动、缩放和清空。',
       exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, and Custom long-edge export. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x 和自定义长边导出。',
       licenseTitle:'Activate / 授权激活',licenseText:'Enter the purchase email and license code. 输入购买邮箱和授权码即可激活。',email:'Email / 邮箱',licenseCode:'License Code / 授权码',activate:'Activate',clearLicense:'Clear License',
-      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.'
+      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportDone:'PNG exported.',exportFailed:'PNG export failed.'
     },
     zh:{
       finish:'成片效果',finishSaturation:'饱和度',finishContrast:'最终对比度',finishSharpness:'锐度',finishClarity:'清晰度',finishHighlight:'高光增强',finishBloom:'辉光',finishWarmth:'金色暖度',
@@ -567,7 +612,7 @@ body.mosaic-mode .single-only{display:none}
       overlayHelpTitle:'叠加',overlayHelpText:'叠加图会显示在浮雕上方。可以在画布中拖动，用鼠标滚轮或缩放控件调整大小，清空后回到空白状态。',
       exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x 和自定义长边导出；扫光视频会导出一段 WebM 灯光动画。',
       licenseTitle:'授权激活',licenseText:'请输入购买邮箱和授权码，激活后即可使用。',email:'邮箱',licenseCode:'授权码',activate:'激活',clearLicense:'清除授权',
-      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。'
+      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportDone:'PNG 已导出。',exportFailed:'PNG 导出失败。'
     }
   };
   function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
@@ -576,6 +621,7 @@ body.mosaic-mode .single-only{display:none}
   function noise(x,y){var n=Math.sin(x*12.9898+y*78.233)*43758.5453;return n-Math.floor(n)}
   function setStatus(s){statusEl.textContent=s}
   function tr(key){return (i18n[state.lang]&&i18n[state.lang][key])||i18n.en[key]||key}
+  function nextFrame(){return new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve)})})}
   function setText(selector,value){var el=document.querySelector(selector);if(el)el.textContent=value}
   function setAll(list){list.forEach(function(item){setText(item[0],tr(item[1]))})}
   function setOption(select,value,key){var el=document.querySelector(select+' option[value="'+value+'"]');if(el)el.textContent=tr(key)}
@@ -1147,6 +1193,44 @@ body.mosaic-mode .single-only{display:none}
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href)},2500);
   }
+  function setExportBusy(active,size){
+    var button=document.getElementById('export'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
+    if(active){
+      button.disabled=true; sweep.disabled=true;
+      button.textContent=tr('exportingPng');
+      document.getElementById('exportOverlayTitle').textContent=tr('exportingPng');
+      document.getElementById('exportOverlayText').textContent=(size?size[0]+' x '+size[1]+'. ':'')+tr('exportingPngHint');
+      overlay.classList.add('open');
+      setStatus((size?size[0]+' x '+size[1]+' · ':'')+tr('exportingPngHint'));
+    }else{
+      button.disabled=false; sweep.disabled=false;
+      button.textContent=tr('exportPng');
+      overlay.classList.remove('open');
+    }
+  }
+  async function exportPng(){
+    var size=exportDimensions();
+    setExportBusy(true,size);
+    await nextFrame();
+    try{
+      var out=document.createElement('canvas');
+      out.width=size[0]; out.height=size[1];
+      drawCanvas(out,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)));
+      await new Promise(function(resolve,reject){
+        out.toBlob(function(blob){
+          if(!blob){reject(new Error('PNG encoder returned an empty result'));return}
+          saveBlob(blob,'emboss-lab-'+exportSuffix()+'-'+out.width+'x'+out.height+'.png');
+          resolve();
+        },'image/png');
+      });
+      setStatus(tr('exportDone'));
+    }catch(error){
+      console.error(error);
+      setStatus(tr('exportFailed'));
+    }finally{
+      setExportBusy(false);
+    }
+  }
   function fileLoad(file){if(!file)return;var reader=new FileReader();reader.onload=function(){loadData(reader.result,file.name,true)};reader.readAsDataURL(file)}
   function panelLoad(file,index){
     if(!file)return;
@@ -1457,10 +1541,7 @@ body.mosaic-mode .single-only{display:none}
     updateValues();schedule();
   }
   function moveLight(e){var r=stage.getBoundingClientRect();state.angle=Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI);document.getElementById('angle').value=state.angle;updateValues();schedule()}
-  document.getElementById('export').onclick=function(){
-    var size=exportDimensions(),out=document.createElement('canvas');out.width=size[0];out.height=size[1];drawCanvas(out,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)));
-    out.toBlob(function(blob){saveBlob(blob,'emboss-lab-'+exportSuffix()+'-'+out.width+'x'+out.height+'.png')},'image/png');
-  };
+  document.getElementById('export').onclick=exportPng;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal(helpModal);if(licenseUnlocked)closeModal(licenseModal)}});
   setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();seed();new ResizeObserver(resizePreview).observe(stage);
 })();

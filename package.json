@@ -9,6 +9,9 @@
     "build": "electron-builder",
     "build:win": "electron-builder --win portable",
     "build:mac": "electron-builder --mac dmg zip",
+    "build:mac:arm64": "electron-builder --mac dmg zip --arm64",
+    "build:mac:x64": "electron-builder --mac dmg zip --x64",
+    "build:mac:universal": "electron-builder --mac dmg zip --universal",
     "license:keygen": "node license/create-keypair.js",
     "license:generate": "node license/generate-license.js",
     "license:admin": "electron license/admin-main.js"
@@ -34,6 +37,9 @@
     "mac": {
       "icon": "icon/icon.png",
       "category": "public.app-category.graphics-design",
+      "identity": "tao zhang (AC8ABF9K2Q)",
+      "hardenedRuntime": true,
+      "notarize": true,
       "target": [
         "dmg",
         "zip"
