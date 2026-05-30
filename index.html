@@ -229,6 +229,7 @@ body.mosaic-mode .single-only{display:none}
 }
 .footer{padding:0 12px 12px;display:grid;gap:8px;margin-top:auto}
 .export-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.export-actions .primary{grid-column:1/-1}
 .status{font-size:11px;color:var(--muted);line-height:1.4}
 .modal{
   position:fixed;
@@ -449,6 +450,7 @@ body.mosaic-mode .single-only{display:none}
       </div>
       <div class="export-actions">
         <button class="btn primary icon" id="export" type="button">PNG</button>
+        <button class="btn icon" id="exportSubject" type="button">Auto Subject</button>
         <button class="btn icon" id="exportSweep" type="button">Export Light Sweep</button>
       </div>
       <div class="status" id="status">Drag across the preview to move the light.</div>
@@ -582,16 +584,16 @@ body.mosaic-mode .single-only{display:none}
       material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
-      exportPng:'PNG',exportSweep:'Export Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
+      exportPng:'PNG Export',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
       help:'Help / 帮助',close:'Close',helpTitle:'Help / 帮助',
       quickTitle:'Quick Start / 快速开始',quickText:'Upload a PNG, JPG, WebP, or SVG. Use Brightness for normal images, Alpha for transparent logos. 导入图片后选择亮度或透明度作为高度来源。',
       reliefHelpTitle:'Relief / 浮雕',reliefHelpText:'Height controls depth, Edge softness smooths edges, Base cut removes faint background, Edge swell adds raised bevel. 调节高度、柔边、底部裁切和边缘膨胀。',
       compHelpTitle:'Composition / 构图',compHelpText:'Single is for one centered image. Mosaic blends multiple panels into one relief board. Drag the preview to move light. Single 适合单图，Mosaic 适合多图拼版。',
       matHelpTitle:'Material / 材质',matHelpText:'Choose a preset first, then fine tune color, grain, roughness, highlight, and surface texture. 先选预设，再微调颜色、颗粒和反光。',
       overlayHelpTitle:'Overlay / 叠加',overlayHelpText:'Overlay keeps a PNG/WebP/SVG above the relief. Drag it on canvas, use mouse wheel or Scale to resize, Clear returns to Blank. 叠加图可拖动、缩放和清空。',
-      exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, and Custom long-edge export. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x 和自定义长边导出。',
+      exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, Custom long-edge export, and Auto Subject transparent crop. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x、自定义长边，以及 Auto Subject 透明主体裁切导出。',
       licenseTitle:'Activate / 授权激活',licenseText:'Enter the purchase email and license code. 输入购买邮箱和授权码即可激活。',email:'Email / 邮箱',licenseCode:'License Code / 授权码',activate:'Activate',clearLicense:'Clear License',
-      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportDone:'PNG exported.',exportFailed:'PNG export failed.'
+      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportingSubject:'Exporting Auto Subject...',exportingSubjectHint:'Cropping the active relief area into a transparent PNG.',exportDone:'PNG exported.',subjectDone:'Auto Subject PNG exported.',exportFailed:'PNG export failed.',subjectFailed:'Auto Subject export failed.'
     },
     zh:{
       finish:'成片效果',finishSaturation:'饱和度',finishContrast:'最终对比度',finishSharpness:'锐度',finishClarity:'清晰度',finishHighlight:'高光增强',finishBloom:'辉光',finishWarmth:'金色暖度',
@@ -603,16 +605,16 @@ body.mosaic-mode .single-only{display:none}
       panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',
       material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
-      exportPng:'导出 PNG',exportSweep:'导出扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
+      exportPng:'导出 PNG',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
       help:'帮助',close:'关闭',helpTitle:'帮助',
       quickTitle:'快速开始',quickText:'导入 PNG、JPG、WebP 或 SVG。普通图片建议用“亮度”，透明标志建议用“透明度”作为高度来源。',
       reliefHelpTitle:'浮雕',reliefHelpText:'高度控制起伏深度，边缘柔化让轮廓更顺，底部裁切可以去掉浅色背景，边缘膨胀会增加凸起的倒角感。',
       compHelpTitle:'构图',compHelpText:'单图适合居中展示一个图像；拼版会把多个面板融合成一张浮雕板。拖动预览区可以调整灯光方向。',
       matHelpTitle:'材质',matHelpText:'先选择材质预设，再微调颜色、颗粒、粗糙度、高光和表面纹理。',
       overlayHelpTitle:'叠加',overlayHelpText:'叠加图会显示在浮雕上方。可以在画布中拖动，用鼠标滚轮或缩放控件调整大小，清空后回到空白状态。',
-      exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x 和自定义长边导出；扫光视频会导出一段 WebM 灯光动画。',
+      exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x、自定义长边，以及 Auto Subject 透明主体裁切导出；扫光视频会导出一段 WebM 灯光动画。',
       licenseTitle:'授权激活',licenseText:'请输入购买邮箱和授权码，激活后即可使用。',email:'邮箱',licenseCode:'授权码',activate:'激活',clearLicense:'清除授权',
-      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportDone:'PNG 已导出。',exportFailed:'PNG 导出失败。'
+      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportingSubject:'正在导出 Auto Subject...',exportingSubjectHint:'正在根据有效浮雕区域裁切透明 PNG。',exportDone:'PNG 已导出。',subjectDone:'Auto Subject PNG 已导出。',exportFailed:'PNG 导出失败。',subjectFailed:'Auto Subject 导出失败。'
     }
   };
   function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
@@ -637,7 +639,7 @@ body.mosaic-mode .single-only{display:none}
       ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
-      ['#export','exportPng'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
+      ['#export','exportPng'],['#exportSubject','exportSubject'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
       ['#licenseTitle','licenseTitle'],['#licenseModal .status','licenseText'],['#licenseEmailLabel','email'],['#licenseCodeLabel','licenseCode'],['#licenseActivate','activate'],['#licenseClear','clearLicense']
     ]);
     document.getElementById('langToggle').textContent='中文/EN';
@@ -1105,9 +1107,10 @@ body.mosaic-mode .single-only{display:none}
       else if(target===preview) drawPanelAdd(ctx,rect);
     });
   }
-  function drawCanvas(target, scale){
+  function drawCanvas(target, scale, options){
     if(!image.naturalWidth) return;
     var ctx=target.getContext('2d'), board=artboardRect(target);
+    options=options||{};
     ctx.fillStyle=state.back;
     ctx.fillRect(0,0,target.width,target.height);
     if(target===preview){
@@ -1119,14 +1122,15 @@ body.mosaic-mode .single-only{display:none}
     }else{
       panelSurface(ctx,board);
       var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,surfaceBlend:true});
-      if(relief) drawOverlay(ctx,target,relief.w,relief.h,relief.x,relief.y);
+      if(relief&&!options.skipOverlay) drawOverlay(ctx,target,relief.w,relief.h,relief.x,relief.y);
     }
-    if(state.composition==='mosaic') drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
+    if(state.composition==='mosaic'&&!options.skipOverlay) drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
     materialTexture(ctx,board);
     if(state.composition==='mosaic') drawMosaicSeams(ctx,board,scale);
     grainCanvas(ctx,target);
     applyFinish(ctx,target);
     if(target===preview) statsEl.textContent=board.w+' x '+board.h+' canvas';
+    return {board:board,relief:relief};
   }
   function drawOverlay(ctx,target,w,h,x,y){
     if(!overlayReady||!overlay.naturalWidth) return;
@@ -1193,18 +1197,21 @@ body.mosaic-mode .single-only{display:none}
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href)},2500);
   }
-  function setExportBusy(active,size){
-    var button=document.getElementById('export'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
+  function setExportBusy(active,size,mode){
+    var button=document.getElementById('export'), subject=document.getElementById('exportSubject'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
+    var title=mode==='subject'?tr('exportingSubject'):tr('exportingPng');
+    var hint=mode==='subject'?tr('exportingSubjectHint'):tr('exportingPngHint');
     if(active){
-      button.disabled=true; sweep.disabled=true;
-      button.textContent=tr('exportingPng');
-      document.getElementById('exportOverlayTitle').textContent=tr('exportingPng');
-      document.getElementById('exportOverlayText').textContent=(size?size[0]+' x '+size[1]+'. ':'')+tr('exportingPngHint');
+      button.disabled=true; subject.disabled=true; sweep.disabled=true;
+      (mode==='subject'?subject:button).textContent=title;
+      document.getElementById('exportOverlayTitle').textContent=title;
+      document.getElementById('exportOverlayText').textContent=(size?size[0]+' x '+size[1]+'. ':'')+hint;
       overlay.classList.add('open');
-      setStatus((size?size[0]+' x '+size[1]+' · ':'')+tr('exportingPngHint'));
+      setStatus((size?size[0]+' x '+size[1]+' · ':'')+hint);
     }else{
-      button.disabled=false; sweep.disabled=false;
+      button.disabled=false; subject.disabled=false; sweep.disabled=false;
       button.textContent=tr('exportPng');
+      subject.textContent=tr('exportSubject');
       overlay.classList.remove('open');
     }
   }
@@ -1227,6 +1234,73 @@ body.mosaic-mode .single-only{display:none}
     }catch(error){
       console.error(error);
       setStatus(tr('exportFailed'));
+    }finally{
+      setExportBusy(false);
+    }
+  }
+  function subjectBounds(source){
+    var heights=sampleHeight(source), mask=source.blendMask, w=source.canvas.width, h=source.canvas.height;
+    var minX=w,minY=h,maxX=-1,maxY=-1;
+    for(var y=0;y<h;y++) for(var x=0;x<w;x++){
+      var i=y*w+x, active=Math.max(heights[i],mask?mask[i]:0);
+      if(active>.025){if(x<minX)minX=x;if(y<minY)minY=y;if(x>maxX)maxX=x;if(y>maxY)maxY=y}
+    }
+    if(maxX<minX||maxY<minY) return null;
+    var pad=Math.round(Math.max(maxX-minX+1,maxY-minY+1)*.07+10);
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(w-1,maxX+pad); maxY=Math.min(h-1,maxY+pad);
+    return {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
+  }
+  function subjectMaskCanvas(source){
+    var heights=sampleHeight(source), mask=source.blendMask, w=source.canvas.width, h=source.canvas.height;
+    var canvas=document.createElement('canvas'), ctx=canvas.getContext('2d');
+    canvas.width=w; canvas.height=h;
+    var img=ctx.createImageData(w,h), data=img.data;
+    for(var i=0;i<w*h;i++){
+      var a=smoothstep(.015,.16,Math.max(heights[i],mask?mask[i]:0));
+      var p=i*4;
+      data[p]=255; data[p+1]=255; data[p+2]=255; data[p+3]=Math.round(a*255);
+    }
+    ctx.putImageData(img,0,0);
+    return canvas;
+  }
+  async function exportSubjectPng(){
+    var source=sourceAt(0), size=exportDimensions();
+    setExportBusy(true,size,'subject');
+    await nextFrame();
+    try{
+      if(state.composition!=='single'||!source.image.naturalWidth||!source.canvas.width) throw new Error('Auto Subject requires a single loaded image.');
+      var box=subjectBounds(source);
+      if(!box) throw new Error('No active subject found.');
+      var full=document.createElement('canvas');
+      full.width=size[0]; full.height=size[1];
+      var renderInfo=drawCanvas(full,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)),{skipOverlay:true});
+      if(!renderInfo||!renderInfo.relief) throw new Error('Relief render failed.');
+      var relief=renderInfo.relief, sw=source.canvas.width, sh=source.canvas.height;
+      var x1=relief.x+box.x/sw*relief.w, y1=relief.y+box.y/sh*relief.h;
+      var x2=relief.x+(box.x+box.w)/sw*relief.w, y2=relief.y+(box.y+box.h)/sh*relief.h;
+      var cropX=Math.floor(x1), cropY=Math.floor(y1), cropW=Math.max(1,Math.ceil(x2)-cropX), cropH=Math.max(1,Math.ceil(y2)-cropY);
+      var out=document.createElement('canvas'), ctx=out.getContext('2d');
+      out.width=cropW; out.height=cropH;
+      ctx.drawImage(full,-cropX,-cropY);
+      var mask=subjectMaskCanvas(source), maskOut=document.createElement('canvas'), maskCtx=maskOut.getContext('2d');
+      maskOut.width=cropW; maskOut.height=cropH;
+      maskCtx.imageSmoothingEnabled=true;
+      maskCtx.drawImage(mask,box.x,box.y,box.w,box.h,0,0,cropW,cropH);
+      ctx.globalCompositeOperation='destination-in';
+      ctx.drawImage(maskOut,0,0);
+      ctx.globalCompositeOperation='source-over';
+      await new Promise(function(resolve,reject){
+        out.toBlob(function(blob){
+          if(!blob){reject(new Error('PNG encoder returned an empty result'));return}
+          saveBlob(blob,'emboss-lab-auto-subject-'+exportSuffix()+'-'+out.width+'x'+out.height+'.png');
+          resolve();
+        },'image/png');
+      });
+      setStatus(tr('subjectDone'));
+    }catch(error){
+      console.error(error);
+      setStatus(tr('subjectFailed'));
     }finally{
       setExportBusy(false);
     }
@@ -1412,6 +1486,7 @@ body.mosaic-mode .single-only{display:none}
   document.getElementById('shuffleMosaic').addEventListener('click',function(){shuffleMosaic();setStatus('Grid shuffled. Each panel keeps its uploaded relief.')});
   document.getElementById('centerRelief').addEventListener('click',function(){state.reliefX=0;state.reliefY=0;document.getElementById('reliefX').value=0;document.getElementById('reliefY').value=0;updateValues();schedule()});
   document.getElementById('sweep').addEventListener('click',toggleSweep);
+  document.getElementById('exportSubject').addEventListener('click',exportSubjectPng);
   document.getElementById('exportSweep').addEventListener('click',exportSweep);
   document.getElementById('overlayFile').addEventListener('change',function(){overlayLoad(this.files[0])});
   document.getElementById('centerOverlay').addEventListener('click',function(){state.overlayX=0;state.overlayY=0;document.getElementById('overlayX').value=0;document.getElementById('overlayY').value=0;updateValues();schedule()});
