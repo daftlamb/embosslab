@@ -230,6 +230,7 @@ body.mosaic-mode .single-only{display:none}
 .footer{padding:0 12px 12px;display:grid;gap:8px;margin-top:auto}
 .export-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .export-actions .primary{grid-column:1/-1}
+.export-actions .wide{grid-column:1/-1}
 .status{font-size:11px;color:var(--muted);line-height:1.4}
 .modal{
   position:fixed;
@@ -450,8 +451,9 @@ body.mosaic-mode .single-only{display:none}
       </div>
       <div class="export-actions">
         <button class="btn primary icon" id="export" type="button">PNG</button>
+        <button class="btn icon" id="exportHeightMap" type="button">Height Map</button>
         <button class="btn icon" id="exportSubject" type="button">Auto Subject</button>
-        <button class="btn icon" id="exportSweep" type="button">Export Light Sweep</button>
+        <button class="btn icon wide" id="exportSweep" type="button">Export Light Sweep</button>
       </div>
       <div class="status" id="status">Drag across the preview to move the light.</div>
     </div>
@@ -584,16 +586,16 @@ body.mosaic-mode .single-only{display:none}
       material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
-      exportPng:'PNG Export',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
+      exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
       help:'Help / 帮助',close:'Close',helpTitle:'Help / 帮助',
       quickTitle:'Quick Start / 快速开始',quickText:'Upload a PNG, JPG, WebP, or SVG. Use Brightness for normal images, Alpha for transparent logos. 导入图片后选择亮度或透明度作为高度来源。',
       reliefHelpTitle:'Relief / 浮雕',reliefHelpText:'Height controls depth, Edge softness smooths edges, Base cut removes faint background, Edge swell adds raised bevel. 调节高度、柔边、底部裁切和边缘膨胀。',
       compHelpTitle:'Composition / 构图',compHelpText:'Single is for one centered image. Mosaic blends multiple panels into one relief board. Drag the preview to move light. Single 适合单图，Mosaic 适合多图拼版。',
       matHelpTitle:'Material / 材质',matHelpText:'Choose a preset first, then fine tune color, grain, roughness, highlight, and surface texture. 先选预设，再微调颜色、颗粒和反光。',
       overlayHelpTitle:'Overlay / 叠加',overlayHelpText:'Overlay keeps a PNG/WebP/SVG above the relief. Drag it on canvas, use mouse wheel or Scale to resize, Clear returns to Blank. 叠加图可拖动、缩放和清空。',
-      exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, Custom long-edge export, and Auto Subject transparent crop. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x、自定义长边，以及 Auto Subject 透明主体裁切导出。',
+      exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, Custom long-edge export, Height Map, and Auto Subject transparent crop. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x、自定义长边、灰度高度图，以及 Auto Subject 透明主体裁切导出。',
       licenseTitle:'Activate / 授权激活',licenseText:'Enter the purchase email and license code. 输入购买邮箱和授权码即可激活。',email:'Email / 邮箱',licenseCode:'License Code / 授权码',activate:'Activate',clearLicense:'Clear License',
-      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportingSubject:'Exporting Auto Subject...',exportingSubjectHint:'Cropping the active relief area into a transparent PNG.',exportDone:'PNG exported.',subjectDone:'Auto Subject PNG exported.',exportFailed:'PNG export failed.',subjectFailed:'Auto Subject export failed.'
+      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportingHeightMap:'Exporting Height Map...',exportingHeightMapHint:'Writing the current relief height as a black-to-white PNG.',exportingSubject:'Exporting Auto Subject...',exportingSubjectHint:'Cropping the active relief area into a transparent PNG.',exportDone:'PNG exported.',heightMapDone:'Height Map PNG exported.',subjectDone:'Auto Subject PNG exported.',exportFailed:'PNG export failed.',heightMapFailed:'Height Map export failed.',subjectFailed:'Auto Subject export failed.'
     },
     zh:{
       finish:'成片效果',finishSaturation:'饱和度',finishContrast:'最终对比度',finishSharpness:'锐度',finishClarity:'清晰度',finishHighlight:'高光增强',finishBloom:'辉光',finishWarmth:'金色暖度',
@@ -605,16 +607,16 @@ body.mosaic-mode .single-only{display:none}
       panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',
       material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
-      exportPng:'导出 PNG',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
+      exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
       help:'帮助',close:'关闭',helpTitle:'帮助',
       quickTitle:'快速开始',quickText:'导入 PNG、JPG、WebP 或 SVG。普通图片建议用“亮度”，透明标志建议用“透明度”作为高度来源。',
       reliefHelpTitle:'浮雕',reliefHelpText:'高度控制起伏深度，边缘柔化让轮廓更顺，底部裁切可以去掉浅色背景，边缘膨胀会增加凸起的倒角感。',
       compHelpTitle:'构图',compHelpText:'单图适合居中展示一个图像；拼版会把多个面板融合成一张浮雕板。拖动预览区可以调整灯光方向。',
       matHelpTitle:'材质',matHelpText:'先选择材质预设，再微调颜色、颗粒、粗糙度、高光和表面纹理。',
       overlayHelpTitle:'叠加',overlayHelpText:'叠加图会显示在浮雕上方。可以在画布中拖动，用鼠标滚轮或缩放控件调整大小，清空后回到空白状态。',
-      exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x、自定义长边，以及 Auto Subject 透明主体裁切导出；扫光视频会导出一段 WebM 灯光动画。',
+      exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x、自定义长边、灰度高度图，以及 Auto Subject 透明主体裁切导出；扫光视频会导出一段 WebM 灯光动画。',
       licenseTitle:'授权激活',licenseText:'请输入购买邮箱和授权码，激活后即可使用。',email:'邮箱',licenseCode:'授权码',activate:'激活',clearLicense:'清除授权',
-      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportingSubject:'正在导出 Auto Subject...',exportingSubjectHint:'正在根据有效浮雕区域裁切透明 PNG。',exportDone:'PNG 已导出。',subjectDone:'Auto Subject PNG 已导出。',exportFailed:'PNG 导出失败。',subjectFailed:'Auto Subject 导出失败。'
+      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportingHeightMap:'正在导出灰度高度图...',exportingHeightMapHint:'将当前浮雕高度写成黑到白的 PNG。',exportingSubject:'正在导出 Auto Subject...',exportingSubjectHint:'正在根据有效浮雕区域裁切透明 PNG。',exportDone:'PNG 已导出。',heightMapDone:'灰度高度图 PNG 已导出。',subjectDone:'Auto Subject PNG 已导出。',exportFailed:'PNG 导出失败。',heightMapFailed:'灰度高度图导出失败。',subjectFailed:'Auto Subject 导出失败。'
     }
   };
   function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
@@ -639,7 +641,7 @@ body.mosaic-mode .single-only{display:none}
       ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
-      ['#export','exportPng'],['#exportSubject','exportSubject'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
+      ['#export','exportPng'],['#exportHeightMap','exportHeightMap'],['#exportSubject','exportSubject'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
       ['#licenseTitle','licenseTitle'],['#licenseModal .status','licenseText'],['#licenseEmailLabel','email'],['#licenseCodeLabel','licenseCode'],['#licenseActivate','activate'],['#licenseClear','clearLicense']
     ]);
     document.getElementById('langToggle').textContent='中文/EN';
@@ -1198,19 +1200,20 @@ body.mosaic-mode .single-only{display:none}
     setTimeout(function(){URL.revokeObjectURL(a.href)},2500);
   }
   function setExportBusy(active,size,mode){
-    var button=document.getElementById('export'), subject=document.getElementById('exportSubject'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
-    var title=mode==='subject'?tr('exportingSubject'):tr('exportingPng');
-    var hint=mode==='subject'?tr('exportingSubjectHint'):tr('exportingPngHint');
+    var button=document.getElementById('export'), heightMap=document.getElementById('exportHeightMap'), subject=document.getElementById('exportSubject'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
+    var title=mode==='subject'?tr('exportingSubject'):(mode==='heightMap'?tr('exportingHeightMap'):tr('exportingPng'));
+    var hint=mode==='subject'?tr('exportingSubjectHint'):(mode==='heightMap'?tr('exportingHeightMapHint'):tr('exportingPngHint'));
     if(active){
-      button.disabled=true; subject.disabled=true; sweep.disabled=true;
-      (mode==='subject'?subject:button).textContent=title;
+      button.disabled=true; heightMap.disabled=true; subject.disabled=true; sweep.disabled=true;
+      (mode==='subject'?subject:(mode==='heightMap'?heightMap:button)).textContent=title;
       document.getElementById('exportOverlayTitle').textContent=title;
       document.getElementById('exportOverlayText').textContent=(size?size[0]+' x '+size[1]+'. ':'')+hint;
       overlay.classList.add('open');
       setStatus((size?size[0]+' x '+size[1]+' · ':'')+hint);
     }else{
-      button.disabled=false; subject.disabled=false; sweep.disabled=false;
+      button.disabled=false; heightMap.disabled=false; subject.disabled=false; sweep.disabled=false;
       button.textContent=tr('exportPng');
+      heightMap.textContent=tr('exportHeightMap');
       subject.textContent=tr('exportSubject');
       overlay.classList.remove('open');
     }
@@ -1234,6 +1237,82 @@ body.mosaic-mode .single-only{display:none}
     }catch(error){
       console.error(error);
       setStatus(tr('exportFailed'));
+    }finally{
+      setExportBusy(false);
+    }
+  }
+  function drawHeightMapSource(source, ctx, frame, scale, mode){
+    if(!source||!source.image.naturalWidth||!source.canvas.width) return null;
+    var max=Math.min(1600*scale,Math.max(frame.w,frame.h));
+    var fit=fitInside(source.canvas.width,source.canvas.height,Math.min(frame.w,max)*.78,Math.min(frame.h,max)*.78);
+    var reliefScale=mode&&mode.panel?source.panelScale:state.reliefScale;
+    var offsetX=mode&&mode.panel?source.panelX:state.reliefX;
+    var offsetY=mode&&mode.panel?source.panelY:state.reliefY;
+    var w=Math.max(2,Math.round(fit[0]*reliefScale/100)), h=Math.max(2,Math.round(fit[1]*reliefScale/100));
+    var dx=mode&&mode.offset?frame.w*offsetX/100:(mode&&mode.panel?frame.w*offsetX/100:0);
+    var dy=mode&&mode.offset?frame.h*offsetY/100:(mode&&mode.panel?frame.h*offsetY/100:0);
+    var x=Math.round(frame.x+(frame.w-w)/2+dx), y=Math.round(frame.y+(frame.h-h)/2+dy);
+    var heights=sampleHeight(source), hw=source.canvas.width, hh=source.canvas.height;
+    var map=document.createElement('canvas'), mapCtx=map.getContext('2d');
+    map.width=hw; map.height=hh;
+    var img=mapCtx.createImageData(hw,hh), data=img.data;
+    for(var i=0;i<hw*hh;i++){
+      var v=Math.round(clamp(heights[i],0,1)*255), p=i*4;
+      data[p]=v; data[p+1]=v; data[p+2]=v; data[p+3]=255;
+    }
+    mapCtx.putImageData(img,0,0);
+    if(mode&&mode.clip){
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(frame.x,frame.y,frame.w,frame.h);
+      ctx.clip();
+    }
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(map,x,y,w,h);
+    if(mode&&mode.clip) ctx.restore();
+    return {x:x,y:y,w:w,h:h};
+  }
+  function drawHeightMapCanvas(target, scale){
+    if(!image.naturalWidth) return 0;
+    scale=scale||1;
+    var ctx=target.getContext('2d'), board=artboardRect(target), drawn=0;
+    ctx.fillStyle='#000';
+    ctx.fillRect(0,0,target.width,target.height);
+    if(state.composition==='mosaic'){
+      if(mosaicLayout.length!==state.mosaicCount) shuffleMosaic();
+      mosaicLayout.forEach(function(cell,index){
+        var rect={
+          x:Math.round(board.x+cell.x*board.w),
+          y:Math.round(board.y+cell.y*board.h),
+          w:Math.max(2,Math.round(cell.w*board.w)),
+          h:Math.max(2,Math.round(cell.h*board.h))
+        };
+        if(sourceAt(index).userLoaded&&drawHeightMapSource(sourceAt(index),ctx,rect,scale,{panel:true,clip:true})) drawn++;
+      });
+    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true})){
+      drawn++;
+    }
+    return drawn;
+  }
+  async function exportHeightMapPng(){
+    var size=exportDimensions();
+    setExportBusy(true,size,'heightMap');
+    await nextFrame();
+    try{
+      var out=document.createElement('canvas');
+      out.width=size[0]; out.height=size[1];
+      if(!drawHeightMapCanvas(out,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)))) throw new Error('No relief source found.');
+      await new Promise(function(resolve,reject){
+        out.toBlob(function(blob){
+          if(!blob){reject(new Error('PNG encoder returned an empty result'));return}
+          saveBlob(blob,'emboss-lab-height-map-'+exportSuffix()+'-'+out.width+'x'+out.height+'.png');
+          resolve();
+        },'image/png');
+      });
+      setStatus(tr('heightMapDone'));
+    }catch(error){
+      console.error(error);
+      setStatus(tr('heightMapFailed'));
     }finally{
       setExportBusy(false);
     }
@@ -1486,6 +1565,7 @@ body.mosaic-mode .single-only{display:none}
   document.getElementById('shuffleMosaic').addEventListener('click',function(){shuffleMosaic();setStatus('Grid shuffled. Each panel keeps its uploaded relief.')});
   document.getElementById('centerRelief').addEventListener('click',function(){state.reliefX=0;state.reliefY=0;document.getElementById('reliefX').value=0;document.getElementById('reliefY').value=0;updateValues();schedule()});
   document.getElementById('sweep').addEventListener('click',toggleSweep);
+  document.getElementById('exportHeightMap').addEventListener('click',exportHeightMapPng);
   document.getElementById('exportSubject').addEventListener('click',exportSubjectPng);
   document.getElementById('exportSweep').addEventListener('click',exportSweep);
   document.getElementById('overlayFile').addEventListener('change',function(){overlayLoad(this.files[0])});
