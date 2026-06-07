@@ -1,6 +1,6 @@
 {
   "name": "emboss-lab",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Emboss Lab desktop app.",
   "main": "main.js",
   "private": true,
