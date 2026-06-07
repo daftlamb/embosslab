@@ -73,6 +73,22 @@ h1{margin:7px 0 5px;font:400 37px/1 'Instrument Serif',Georgia,serif;letter-spac
 .upload strong,.upload small{display:block}
 .upload strong{font-size:12px;font-weight:600;margin-bottom:3px}
 .upload small{font-size:11px;color:var(--muted);line-height:1.4}
+.subject-hint{
+  margin-top:8px;
+  padding:8px 9px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:rgba(250,246,241,.8);
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+}
+.subject-hint[hidden]{display:none}
+.subject-hint.warn{
+  border-color:#d9b49d;
+  background:#fff1e8;
+  color:#6d3d2d;
+}
 .row{display:grid;grid-template-columns:1fr 42px;align-items:center;gap:8px;margin-top:8px}
 .row label{font-size:12px;color:var(--text)}
 .value{text-align:right;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
@@ -299,7 +315,7 @@ body.mosaic-mode .single-only{display:none}
         <h2 class="title">Image</h2>
         <label class="upload" id="dropZone">
           <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
-          <img id="thumb" class="thumb" alt="">
+          <span id="thumbBox" class="thumb-box blank"><img id="thumb" alt=""><span class="blank-label">Blank</span></span>
           <span><strong id="fileName">Upload image</strong><small>PNG alpha or grayscale works best. Drop an image here.</small></span>
         </label>
         <div class="seg" style="margin-top:8px">
@@ -307,6 +323,15 @@ body.mosaic-mode .single-only{display:none}
           <button class="btn" data-source="alpha" type="button">Alpha</button>
         </div>
         <div class="toggle"><span>Invert height</span><input id="invert" type="checkbox"></div>
+        <div class="subject-hint" id="subjectHint"></div>
+        <div class="row"><label for="subjectFill">Subject fill</label><span class="value"></span></div>
+        <select id="subjectFill" aria-label="Subject fill">
+          <option value="off">Keep holes</option>
+          <option value="small">Small gaps</option>
+          <option value="solid">Solid fill</option>
+        </select>
+        <div class="row"><label for="subjectSoft">Subject edge</label><span class="value" id="subjectSoftVal"></span></div>
+        <input id="subjectSoft" type="range" min="0" max="100" value="22">
       </section>
       <section class="group">
         <h2 class="title">Relief</h2>
@@ -346,7 +371,7 @@ body.mosaic-mode .single-only{display:none}
             <option value="1.3333333">Landscape 4:3</option>
             <option value="1.7777778">Wide 16:9</option>
           </select>
-          <button class="btn" id="centerRelief" type="button">Center Relief</button>
+          <button class="btn" id="centerRelief" type="button">Reset View</button>
         </div>
         <div class="seg" style="margin-top:8px">
           <button class="btn active" data-composition="single" type="button">Single</button>
@@ -373,6 +398,10 @@ body.mosaic-mode .single-only{display:none}
         <input id="reliefX" type="range" min="-100" max="100" value="0">
         <div class="row"><label for="reliefY">Vertical</label><span class="value" id="reliefYVal"></span></div>
         <input id="reliefY" type="range" min="-100" max="100" value="0">
+        <div class="row"><label for="grooveShadow">Groove shadow</label><span class="value" id="grooveShadowVal"></span></div>
+        <input id="grooveShadow" type="range" min="0" max="100" value="42">
+        <div class="row"><label for="roundBevel">Round bevel</label><span class="value" id="roundBevelVal"></span></div>
+        <input id="roundBevel" type="range" min="0" max="100" value="45">
       </section>
       <section class="group">
         <h2 class="title">Material</h2>
@@ -540,6 +569,7 @@ body.mosaic-mode .single-only{display:none}
   var overlayDrag = null;
   var mosaicDrag = null;
   var lastMosaicRects = [];
+  var lastSingleRect = null;
   var textureCache = {key:'',canvas:null};
   var lastOverlayRect = null;
   var lastReliefFrame = null;
@@ -550,11 +580,11 @@ body.mosaic-mode .single-only{display:none}
   var sweepBase = 0;
   var licenseUnlocked = false;
   var state = {
-    source:'luma', invert:false, height:48, soft:10, contrast:118, threshold:6, bevel:34,
+    source:'luma', invert:false, subjectFill:'off', subjectSoft:22, height:48, soft:10, contrast:118, threshold:6, bevel:34,
     angle:-42, lightHeight:58, ambient:42, shine:72, sweepDuration:4, sweep:false, grain:24, rough:38,
     base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42,
     composition:'single', mosaicCount:4,
-    canvasRatio:'free', reliefScale:100, reliefX:0, reliefY:0,
+    canvasRatio:'free', reliefScale:100, reliefX:0, reliefY:0, grooveShadow:42, roundBevel:45,
     overlayOpacity:88, overlayScale:100, overlayX:0, overlayY:0,
     finish:'natural', finishSaturation:100, finishContrast:100, finishSharpness:0, finishClarity:0, finishHighlight:0, finishBloom:0, finishWarmth:0,
     lang:localStorage.getItem('embossLabLang')||'en'
@@ -576,6 +606,8 @@ body.mosaic-mode .single-only{display:none}
     gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
     iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50},
     ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
+    glazed:{name:'Glazed Tile',zh:'釉面瓷砖',base:'#8f071b',back:'#2d0309',grain:22,rough:7,shine:100,height:62,texture:'grainProc',textureStrength:20,textureScale:18,textureDetail:48},
+    stoneTile:{name:'Aged Stone',zh:'旧石砖',base:'#d8cbbb',back:'#b6a68f',grain:54,rough:72,shine:38,height:54,texture:'spots',textureStrength:44,textureScale:74,textureDetail:22},
     jade:{name:'Jade Stone',zh:'玉石',base:'#b8d8c1',back:'#6f9783',grain:6,rough:22,shine:86,height:50,texture:'clouds',textureStrength:54,textureScale:72,textureDetail:36},
     leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58},
     wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42}
@@ -586,12 +618,13 @@ body.mosaic-mode .single-only{display:none}
       image:'Image',upload:'Upload image',uploadHint:'PNG alpha or grayscale works best. Drop an image here.',brightness:'Brightness',alpha:'Alpha',invert:'Invert height',
       relief:'Relief',height:'Height',soft:'Edge softness',contrast:'Contrast',threshold:'Base cut',bevel:'Edge swell',
       lighting:'Lighting',angle:'Angle',lightHeight:'Light height',ambient:'Ambient',shine:'Highlight',sweepDuration:'Sweep duration',previewSweep:'Preview Light Sweep',stopSweep:'Stop Light Sweep',
-      composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Center Relief',single:'Single',mosaic:'Mosaic',shuffle:'Shuffle Grid',
-      panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',
+      composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Reset View',single:'Single',mosaic:'Mosaic',shuffle:'Shuffle Grid',
+      panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',grooveShadow:'Groove shadow',roundBevel:'Round bevel',
       material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',finishNatural:'Natural',finishCrisp:'Crisp',finishGold:'Warm Gold',finishProduct:'Product',finishJade:'Jade',finishCinema:'Cinema Glow',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
-      exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
+      exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Click the plus to load an image.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',subjectFill:'Subject fill',fillOff:'Keep holes',fillSmall:'Small gaps',fillSolid:'Solid fill',subjectSoft:'Subject edge',
+      singleReady:'Left-drag to move the image. Middle-drag or wheel to resize.',singleEmpty:'Click the plus to load an image.',mosaicReady:'Click a plus to load a panel. Drag to place, wheel to resize, right-click to remove.',mosaicLoaded:'Drag the relief to place it. Use the wheel to resize.',resetDone:'View reset.',resizeRelief:'Resize this relief.',moveRelief:'Move this relief inside its crop.',reliefScaleStatus:'Relief scale ',overlayScaleStatus:'Overlay scale ',
       help:'Help / 帮助',close:'Close',helpTitle:'Help / 帮助',
       quickTitle:'Quick Start / 快速开始',quickText:'Upload a PNG, JPG, WebP, or SVG. Use Brightness for normal images, Alpha for transparent logos. 导入图片后选择亮度或透明度作为高度来源。',
       reliefHelpTitle:'Relief / 浮雕',reliefHelpText:'Height controls depth, Edge softness smooths edges, Base cut removes faint background, Edge swell adds raised bevel. 调节高度、柔边、底部裁切和边缘膨胀。',
@@ -608,11 +641,12 @@ body.mosaic-mode .single-only{display:none}
       image:'图像',upload:'上传图像',uploadHint:'透明 PNG 或灰度图效果最好。也可以直接拖入图片。',brightness:'亮度',alpha:'透明度',invert:'反转高度',
       relief:'浮雕',height:'高度',soft:'边缘柔化',contrast:'对比度',threshold:'底部裁切',bevel:'边缘膨胀',
       lighting:'灯光',angle:'角度',lightHeight:'灯光高度',ambient:'环境光',shine:'高光',sweepDuration:'扫光时长',previewSweep:'预览扫光',stopSweep:'停止扫光',
-      composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'居中浮雕',single:'单图',mosaic:'拼版',shuffle:'随机网格',
-      panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',
+      composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'重置构图',single:'单图',mosaic:'拼版',shuffle:'随机网格',
+      panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',grooveShadow:'凹槽阴影',roundBevel:'圆润倒角',
       material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
-      exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
+      exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'点击加号载入图片。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',subjectFill:'主体填充',fillOff:'保留镂空',fillSmall:'小缺口',fillSolid:'实心填充',subjectSoft:'主体边缘',
+      singleReady:'左键拖动移动图像，中键拖动或滚轮缩放。',singleEmpty:'点击加号载入图片。',mosaicReady:'点击加号载入面板；拖动定位，滚轮缩放，右键移除。',mosaicLoaded:'拖动浮雕调整位置，滚轮缩放。',resetDone:'构图已重置。',resizeRelief:'缩放这个浮雕。',moveRelief:'移动这个浮雕。',reliefScaleStatus:'浮雕缩放 ',overlayScaleStatus:'叠加图缩放 ',
       help:'帮助',close:'关闭',helpTitle:'帮助',
       quickTitle:'快速开始',quickText:'导入 PNG、JPG、WebP 或 SVG。普通图片建议用“亮度”，透明标志建议用“透明度”作为高度来源。',
       reliefHelpTitle:'浮雕',reliefHelpText:'高度控制起伏深度，边缘柔化让轮廓更顺，底部裁切可以去掉浅色背景，边缘膨胀会增加凸起的倒角感。',
@@ -630,6 +664,8 @@ body.mosaic-mode .single-only{display:none}
   function noise(x,y){var n=Math.sin(x*12.9898+y*78.233)*43758.5453;return n-Math.floor(n)}
   function setStatus(s){statusEl.textContent=s}
   function tr(key){return (i18n[state.lang]&&i18n[state.lang][key])||i18n.en[key]||key}
+  function singleStatus(){return sourceAt(0).userLoaded?tr('singleReady'):tr('singleEmpty')}
+  function compositionStatus(){return state.composition==='mosaic'?tr('mosaicReady'):singleStatus()}
   function nextFrame(){return new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve)})})}
   function setText(selector,value){var el=document.querySelector(selector);if(el)el.textContent=value}
   function setAll(list){list.forEach(function(item){setText(item[0],tr(item[1]))})}
@@ -639,10 +675,10 @@ body.mosaic-mode .single-only{display:none}
     localStorage.setItem('embossLabLang',state.lang);
     setAll([
       ['.brand .eyebrow','eyebrow'],['.brand p','brand'],['.scroll .group:nth-of-type(1) .title','image'],['#dropZone small','uploadHint'],
-      ['[data-source="luma"]','brightness'],['[data-source="alpha"]','alpha'],['.scroll .group:nth-of-type(1) .toggle span','invert'],
+      ['[data-source="luma"]','brightness'],['[data-source="alpha"]','alpha'],['.scroll .group:nth-of-type(1) .toggle span','invert'],['label[for="subjectFill"]','subjectFill'],['label[for="subjectSoft"]','subjectSoft'],
       ['.scroll .group:nth-of-type(2) .title','relief'],['label[for="height"]','height'],['label[for="soft"]','soft'],['label[for="contrast"]','contrast'],['label[for="threshold"]','threshold'],['label[for="bevel"]','bevel'],
       ['.scroll .group:nth-of-type(3) .title','lighting'],['label[for="angle"]','angle'],['label[for="lightHeight"]','lightHeight'],['label[for="ambient"]','ambient'],['label[for="shine"]','shine'],['label[for="sweepDuration"]','sweepDuration'],
-      ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],
+      ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],['label[for="grooveShadow"]','grooveShadow'],['label[for="roundBevel"]','roundBevel'],
       ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['[data-finish="natural"]','finishNatural'],['[data-finish="crisp"]','finishCrisp'],['[data-finish="gold"]','finishGold'],['[data-finish="product"]','finishProduct'],['[data-finish="jade"]','finishJade'],['[data-finish="cinema"]','finishCinema'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
@@ -651,6 +687,7 @@ body.mosaic-mode .single-only{display:none}
     ]);
     document.getElementById('langToggle').textContent='中文/EN';
     if(!sourceAt(0).userLoaded)document.getElementById('fileName').textContent=tr('upload');
+    if(!sourceAt(0).userLoaded)document.getElementById('thumbBox').classList.add('blank');
     if(!overlayReady)document.getElementById('overlayName').textContent=tr('overlayName');
     setText('.help-item:nth-child(1) h3',tr('quickTitle'));setText('.help-item:nth-child(1) p',tr('quickText'));
     setText('.help-item:nth-child(2) h3',tr('reliefHelpTitle'));setText('.help-item:nth-child(2) p',tr('reliefHelpText'));
@@ -662,7 +699,9 @@ body.mosaic-mode .single-only{display:none}
     setOption('#canvasRatio','free','sourceRatio');setOption('#canvasRatio','1','square');setOption('#canvasRatio','0.8','portrait45');setOption('#canvasRatio','0.75','portrait34');setOption('#canvasRatio','1.3333333','landscape43');setOption('#canvasRatio','1.7777778','wide169');
     setOption('#mosaicCount','3','panels3');setOption('#mosaicCount','4','panels4');
     setOption('#surfaceTexture','none','none');setOption('#surfaceTexture','clouds','clouds');setOption('#surfaceTexture','grainProc','fineGrain');setOption('#surfaceTexture','spots','spots');setOption('#surfaceTexture','cells','cells');
+    setOption('#subjectFill','off','fillOff');setOption('#subjectFill','small','fillSmall');setOption('#subjectFill','solid','fillSolid');
     document.querySelectorAll('.material').forEach(function(b){var key=b.dataset.material,m=materials[key];b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name)});
+    updateSubjectHint();
     updateValues();
   }
   function fitSize(w,h,max){var s=Math.min(max/w,max/h,1);return [Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s))]}
@@ -682,7 +721,7 @@ body.mosaic-mode .single-only{display:none}
   function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null;source.alphaMask=null;source.alphaStats=null})}
   function clearTextureCache(){textureCache.key='';textureCache.canvas=null}
   function updateValues(){
-    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
+    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){
       var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+(id==='angle'?' deg':(id==='sweepDuration'?' s':''));
     });
     document.getElementById('base').value=state.base;
@@ -695,6 +734,11 @@ body.mosaic-mode .single-only{display:none}
     document.querySelectorAll('[data-material]').forEach(function(b){b.classList.toggle('active',b.dataset.material===state.material)});
     document.querySelectorAll('[data-finish]').forEach(function(b){b.classList.toggle('active',b.dataset.finish===state.finish)});
     document.body.classList.toggle('mosaic-mode',state.composition==='mosaic');
+    var subject=document.getElementById('exportSubject');
+    subject.disabled=state.composition==='mosaic';
+    subject.title=state.composition==='mosaic'
+      ? (state.lang==='zh'?'主体 PNG 只支持 Single 单图模式。':'Subject PNG is available in Single mode only.')
+      : '';
     document.getElementById('sweep').classList.toggle('active',state.sweep);
     document.getElementById('sweep').textContent=state.sweep?tr('stopSweep'):tr('previewSweep');
   }
@@ -765,8 +809,8 @@ body.mosaic-mode .single-only{display:none}
       }
       h=next;
     }
-    if(state.bevel){
-      var b=state.bevel/100;
+    if(state.bevel||state.roundBevel){
+      var b=clamp((state.bevel+state.roundBevel*.7)/100,0,1.7);
       for(var j=0;j<len;j++) h[j]=Math.pow(h[j],mix(1.9,.65,b));
     }
     source.heightCache=h;
@@ -828,7 +872,8 @@ body.mosaic-mode .single-only{display:none}
     var base=hex(state.base), bg=hex(state.back), surface=surfaceColor();
     var angle=state.angle*Math.PI/180, z=.12+state.lightHeight/46;
     var lx=Math.cos(angle), ly=Math.sin(angle), inv=1/Math.sqrt(lx*lx+ly*ly+z*z); lx*=inv; ly*=inv; var lz=z*inv;
-    var strength=.8+state.height/10, ambient=state.ambient/100, rough=state.rough/100, specPower=mix(12,90,1-rough);
+    var grooveBoost=state.grooveShadow/100, roundBoost=state.roundBevel/100;
+    var strength=.8+state.height/10-roundBoost*.6, ambient=state.ambient/100, rough=state.rough/100, specPower=mix(12,90,1-rough);
     var toxicMetal=state.material==='toxic';
     var reflectiveMetal=state.material==='silver'||state.material==='gold'||state.material==='chrome'||toxicMetal;
     for(var py=0;py<h;py++) for(var px=0;px<w;px++){
@@ -837,10 +882,10 @@ body.mosaic-mode .single-only{display:none}
       var up=heights[Math.max(0,sy-1)*hw+sx], down=heights[Math.min(hh-1,sy+1)*hw+sx];
       var nx=(left-right)*strength, ny=(up-down)*strength, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
       var diff=Math.max(0,nx*lx+ny*ly+nz*lz);
-      var edge=Math.min(1,Math.abs(right-left)*strength+Math.abs(down-up)*strength);
-      var spec=Math.pow(Math.max(0,diff),specPower)*(state.shine/100)*(0.45+edge*.75);
+      var edge=Math.min(1,(Math.abs(right-left)*strength+Math.abs(down-up)*strength)*(1+grooveBoost*.75));
+      var spec=Math.pow(Math.max(0,diff),specPower)*(state.shine/100)*(0.45+edge*(.75+roundBoost*.45));
       var shade=ambient+diff*(1-ambient), grain=(noise(px*.17,py*.17)-.5)*(state.grain/100)*34;
-      var relief=heights[idx], shadow=(1-diff)*edge*48*(state.height/100);
+      var relief=heights[idx], shadow=(1-diff)*edge*48*(state.height/100)*(1+grooveBoost*1.25);
       var metalReflect=0, metalEdge=0, brushed=0, toxicFlow=0, toxicRim=0, toxicPit=0, chromeCurve=0;
       if(reflectiveMetal){
         var ux=px/Math.max(1,w), uy=py/Math.max(1,h);
@@ -1158,7 +1203,6 @@ body.mosaic-mode .single-only{display:none}
     });
   }
   function drawCanvas(target, scale, options){
-    if(!image.naturalWidth) return;
     var ctx=target.getContext('2d'), board=artboardRect(target);
     options=options||{};
     ctx.fillStyle=state.back;
@@ -1171,7 +1215,10 @@ body.mosaic-mode .single-only{display:none}
       drawMosaic(ctx,target,board,scale);
     }else{
       panelSurface(ctx,board);
-      var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,surfaceBlend:true});
+      var source=sourceAt(0);
+      if(target===preview) lastSingleRect={index:0,x:board.x,y:board.y,w:board.w,h:board.h};
+      var relief=source.userLoaded?drawRelief(source,ctx,board,scale,{panel:true,clip:true,surfaceBlend:true}):null;
+      if(!source.userLoaded&&target===preview) drawPanelAdd(ctx,board);
       if(relief&&!options.skipOverlay) drawOverlay(ctx,target,relief.w,relief.h,relief.x,relief.y);
     }
     if(state.composition==='mosaic'&&!options.skipOverlay) drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
@@ -1207,13 +1254,22 @@ body.mosaic-mode .single-only{display:none}
       loadedName=name;
       sourceAt(0).name=name;
       sourceAt(0).userLoaded=!!userLoaded;
-      if(userLoaded){sourceAt(0).panelScale=100;sourceAt(0).panelX=0;sourceAt(0).panelY=0}
+      if(userLoaded){
+        sourceAt(0).panelScale=100;sourceAt(0).panelX=0;sourceAt(0).panelY=0;
+        state.reliefScale=100;state.reliefX=0;state.reliefY=0;
+        document.getElementById('reliefScale').value=100;
+        document.getElementById('reliefX').value=0;
+        document.getElementById('reliefY').value=0;
+      }
       document.getElementById('fileName').textContent=shortName(name);
       document.getElementById('panelName0').textContent=shortName(name);
       document.getElementById('panelThumb0').src=url;
+      document.getElementById('thumbBox').classList.remove('blank');
       thumb.src=url;
       rebuildSource(sourceAt(0));
-      setStatus(state.composition==='mosaic'?(state.lang==='zh'?'拖动浮雕调整位置，滚轮缩放。':'Drag the relief to place it. Use the wheel to resize.'):tr('status'));
+      updateSubjectHint();
+      updateValues();
+      setStatus(state.composition==='mosaic'?tr('mosaicLoaded'):tr('singleReady'));
     };
     image.src=url;
   }
@@ -1259,7 +1315,7 @@ body.mosaic-mode .single-only{display:none}
       overlay.classList.add('open');
       setStatus((size?size[0]+' x '+size[1]+' · ':'')+hint);
     }else{
-      button.disabled=false; heightMap.disabled=false; subject.disabled=false; sweep.disabled=false;
+      button.disabled=false; heightMap.disabled=false; subject.disabled=state.composition==='mosaic'; sweep.disabled=false;
       button.textContent=tr('exportPng');
       heightMap.textContent=tr('exportHeightMap');
       subject.textContent=tr('exportSubject');
@@ -1337,7 +1393,7 @@ body.mosaic-mode .single-only{display:none}
         };
         if(sourceAt(index).userLoaded&&drawHeightMapSource(sourceAt(index),ctx,rect,scale,{panel:true,clip:true})) drawn++;
       });
-    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true})){
+    }else if(sourceAt(0).userLoaded&&drawHeightMapSource(sourceAt(0),ctx,board,scale,{panel:true,clip:true})){
       drawn++;
     }
     return drawn;
@@ -1378,33 +1434,113 @@ body.mosaic-mode .single-only{display:none}
     maxX=Math.min(w-1,maxX+pad); maxY=Math.min(h-1,maxY+pad);
     return {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
   }
+  function subjectSuitabilityMessage(reason){
+    if(reason==='no-bounds') return state.lang==='zh'
+      ? '没有检测到可裁切主体。试试勾选 Invert height，或使用透明 PNG。'
+      : 'No subject boundary was detected. Try Invert height, or use a transparent PNG.';
+    return '';
+  }
+  function subjectDefaultMessage(){
+    return state.lang==='zh'
+      ? '导入图片如果没有透明通道，背景可能无法自动分离；建议先抠图，或使用透明 PNG。'
+      : 'If the imported image has no transparent alpha channel, the background may not separate automatically. Use a cutout or transparent PNG.';
+  }
+  function setSubjectHint(message,warning){
+    var hint=document.getElementById('subjectHint');
+    hint.hidden=false;
+    hint.textContent=message||subjectDefaultMessage();
+    hint.classList.toggle('warn',!!warning);
+  }
+  function updateSubjectHint(){
+    if(state.composition==='mosaic'){
+      setSubjectHint(state.lang==='zh'?'主体 PNG 只支持 Single 单图模式，Mosaic 拼版不能自动裁切主体。':'Subject PNG is available in Single mode only. Mosaic cannot auto-crop a subject.',true);
+      return;
+    }
+    setSubjectHint('',false);
+  }
   function subjectActivity(source,heights,mask,index){
     if(source.alphaStats&&source.alphaStats.useful&&source.alphaMask) return source.alphaMask[index];
-    return Math.max(heights[index],mask?mask[index]:0);
+    if(mask) return mask[index];
+    return heights[index];
   }
   function subjectMaskCanvas(source){
     var heights=sampleHeight(source), mask=source.blendMask, w=source.canvas.width, h=source.canvas.height;
     var canvas=document.createElement('canvas'), ctx=canvas.getContext('2d');
     canvas.width=w; canvas.height=h;
     var img=ctx.createImageData(w,h), data=img.data;
-    for(var i=0;i<w*h;i++){
-      var a=smoothstep(.015,.16,subjectActivity(source,heights,mask,i));
+    var edgeHigh=.04+state.subjectSoft/100*.28;
+    var active=new Uint8Array(w*h), outside=new Uint8Array(w*h), fillHole=new Uint8Array(w*h), queue=[], head=0;
+    for(var i=0;i<w*h;i++) active[i]=subjectActivity(source,heights,mask,i)>.015?1:0;
+    function pushOutside(index){
+      if(active[index]||outside[index]) return;
+      outside[index]=1; queue.push(index);
+    }
+    function floodQueue(pushFn){
+      while(head<queue.length){
+        var q=queue[head++], qx=q%w, qy=Math.floor(q/w);
+        if(qx>0)pushFn(q-1);
+        if(qx<w-1)pushFn(q+1);
+        if(qy>0)pushFn(q-w);
+        if(qy<h-1)pushFn(q+w);
+      }
+    }
+    if(state.subjectFill!=='off'){
+      for(var x=0;x<w;x++){pushOutside(x);pushOutside((h-1)*w+x)}
+      for(var y=1;y<h-1;y++){pushOutside(y*w);pushOutside(y*w+w-1)}
+      floodQueue(pushOutside);
+      if(state.subjectFill==='small'){
+        var seen=new Uint8Array(w*h), maxHole=Math.max(24,Math.round(w*h*.012));
+        for(i=0;i<w*h;i++){
+          if(active[i]||outside[i]||seen[i]) continue;
+          var region=[i], rhead=0, touchesEdge=false; seen[i]=1;
+          while(rhead<region.length){
+            var q=region[rhead++], qx=q%w, qy=Math.floor(q/w);
+            if(qx===0||qy===0||qx===w-1||qy===h-1) touchesEdge=true;
+            function addHole(n){if(!active[n]&&!outside[n]&&!seen[n]){seen[n]=1;region.push(n)}}
+            if(qx>0)addHole(q-1);
+            if(qx<w-1)addHole(q+1);
+            if(qy>0)addHole(q-w);
+            if(qy<h-1)addHole(q+w);
+          }
+          if(!touchesEdge&&region.length<=maxHole) for(var r=0;r<region.length;r++) fillHole[region[r]]=1;
+        }
+      }
+    }
+    for(i=0;i<w*h;i++){
+      var fillMode=state.subjectFill==='solid'&&!outside[i]||state.subjectFill==='small'&&fillHole[i];
+      var activity=subjectActivity(source,heights,mask,i);
+      var a=fillMode?1:smoothstep(.015,edgeHigh,activity);
       var p=i*4;
       data[p]=255; data[p+1]=255; data[p+2]=255; data[p+3]=Math.round(a*255);
     }
     ctx.putImageData(img,0,0);
     return canvas;
   }
+  function fillSubjectBase(ctx,source,box,cropW,cropH){
+    var mask=subjectMaskCanvas(source), maskOut=document.createElement('canvas'), maskCtx=maskOut.getContext('2d');
+    maskOut.width=cropW; maskOut.height=cropH;
+    maskCtx.imageSmoothingEnabled=true;
+    maskCtx.drawImage(mask,box.x,box.y,box.w,box.h,0,0,cropW,cropH);
+    ctx.save();
+    ctx.fillStyle=state.base;
+    ctx.fillRect(0,0,cropW,cropH);
+    ctx.globalCompositeOperation='destination-in';
+    ctx.drawImage(maskOut,0,0);
+    ctx.globalCompositeOperation='source-over';
+    ctx.restore();
+    return maskOut;
+  }
   async function exportSubjectPng(){
     var source=sourceAt(0), size=exportDimensions();
     setExportBusy(true,size,'subject');
     await nextFrame();
     try{
-      if(state.composition!=='single'||!source.image.naturalWidth||!source.canvas.width) throw new Error('Auto Subject requires a single loaded image.');
+      if(state.composition!=='single') throw new Error('subject-mosaic');
+      if(!source.image.naturalWidth||!source.canvas.width) throw new Error('subject-empty');
       sampleHeight(source);
       var noUsefulAlpha=state.source==='alpha'&&(!source.alphaStats||!source.alphaStats.useful);
       var box=subjectBounds(source);
-      if(!box) throw new Error('No active subject found.');
+      if(!box) throw new Error('subject-no-bounds');
       var full=document.createElement('canvas');
       full.width=size[0]; full.height=size[1];
       var renderInfo=drawCanvas(full,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)),{skipOverlay:true});
@@ -1415,11 +1551,8 @@ body.mosaic-mode .single-only{display:none}
       var cropX=Math.floor(x1), cropY=Math.floor(y1), cropW=Math.max(1,Math.ceil(x2)-cropX), cropH=Math.max(1,Math.ceil(y2)-cropY);
       var out=document.createElement('canvas'), ctx=out.getContext('2d');
       out.width=cropW; out.height=cropH;
+      var maskOut=fillSubjectBase(ctx,source,box,cropW,cropH);
       ctx.drawImage(full,-cropX,-cropY);
-      var mask=subjectMaskCanvas(source), maskOut=document.createElement('canvas'), maskCtx=maskOut.getContext('2d');
-      maskOut.width=cropW; maskOut.height=cropH;
-      maskCtx.imageSmoothingEnabled=true;
-      maskCtx.drawImage(mask,box.x,box.y,box.w,box.h,0,0,cropW,cropH);
       ctx.globalCompositeOperation='destination-in';
       ctx.drawImage(maskOut,0,0);
       ctx.globalCompositeOperation='source-over';
@@ -1435,7 +1568,13 @@ body.mosaic-mode .single-only{display:none}
         : tr('subjectDone'));
     }catch(error){
       console.error(error);
-      setStatus(tr('subjectFailed'));
+      if(error&&error.message==='subject-mosaic'){
+        setStatus(state.lang==='zh'?'Mosaic 拼版不能导出主体 PNG；请切回 Single 单图模式。':'Mosaic cannot export Subject PNG. Switch back to Single mode.');
+      }else if(error&&error.message==='subject-no-bounds'){
+        setStatus(subjectSuitabilityMessage('no-bounds'));
+      }else{
+        setStatus(tr('subjectFailed'));
+      }
     }finally{
       setExportBusy(false);
     }
@@ -1452,7 +1591,7 @@ body.mosaic-mode .single-only{display:none}
         document.getElementById('panelThumb'+index).src=reader.result;
         document.getElementById('panelName'+index).textContent=shortName(file.name);
         rebuildSource(source);
-        setStatus('Panel '+(index+1)+' is ready. Drag it to place it; use the wheel to resize.');
+        setStatus(state.lang==='zh'?'面板 '+(index+1)+' 已载入。拖动定位，滚轮缩放。':'Panel '+(index+1)+' is ready. Drag it to place it; use the wheel to resize.');
       };
       source.image.src=reader.result;
     };
@@ -1465,7 +1604,7 @@ body.mosaic-mode .single-only{display:none}
     document.getElementById('panelThumb'+index).removeAttribute('src');
     document.getElementById('panelName'+index).textContent='Panel '+(index+1);
     schedule();
-    setStatus('Panel '+(index+1)+' cleared.');
+    setStatus(state.lang==='zh'?'面板 '+(index+1)+' 已清空。':'Panel '+(index+1)+' cleared.');
   }
   function overlayLoad(file){
     if(!file)return;
@@ -1475,22 +1614,15 @@ body.mosaic-mode .single-only{display:none}
         overlayReady=true; state.overlayX=0; state.overlayY=0;
         document.getElementById('overlayX').value=0; document.getElementById('overlayY').value=0;
         document.getElementById('overlayThumbBox').classList.remove('blank');document.getElementById('overlayThumb').src=reader.result;document.getElementById('overlayName').textContent=shortName(file.name);
-        updateValues();schedule();setStatus('Drag the overlay to place it. It snaps to relief center and edges.');
+        updateValues();schedule();setStatus(state.lang==='zh'?'拖动叠加图定位，会吸附到浮雕中心和边缘。':'Drag the overlay to place it. It snaps to relief center and edges.');
       };
       overlay.src=reader.result;
     };
     reader.readAsDataURL(file);
   }
-  function seed(){
-    var c=document.createElement('canvas'); c.width=900;c.height=900;var cctx=c.getContext('2d');
-    cctx.fillStyle='#060606';cctx.fillRect(0,0,900,900);cctx.fillStyle='#fff';cctx.textAlign='center';cctx.textBaseline='middle';
-    cctx.font='italic 260px Georgia';cctx.fillText('RELIEF',450,350);cctx.font='180px Georgia';cctx.fillText('IT',450,585);
-    cctx.lineWidth=18;cctx.strokeStyle='#fff';cctx.strokeRect(105,115,690,670);cctx.beginPath();cctx.arc(450,450,310,0,Math.PI*2);cctx.stroke();
-    loadData(c.toDataURL('image/png'),'sample-relief.png',false);
-  }
   function createMaterials(){
     var root=document.getElementById('materials');
-    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
+    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);if(key==='glazed'){state.grooveShadow=68;state.roundBevel=82}else if(key==='stoneTile'){state.grooveShadow=52;state.roundBevel=58}document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','textureStrength','textureScale','textureDetail','grooveShadow','roundBevel'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
   }
   function animateSweep(time){
     if(!state.sweep)return;
@@ -1507,10 +1639,10 @@ body.mosaic-mode .single-only{display:none}
     if(state.sweep){
       sweepBase=state.angle; sweepStart=0;
       sweepFrame=requestAnimationFrame(animateSweep);
-      setStatus('Light sweep preview is running. Static export keeps the current light angle.');
+      setStatus(state.lang==='zh'?'扫光预览正在运行；静态导出会保留当前灯光角度。':'Light sweep preview is running. Static export keeps the current light angle.');
     }else{
       cancelAnimationFrame(sweepFrame); sweepFrame=0; sweepStart=0;
-      setStatus('Drag across the preview to move the light.');
+      setStatus(tr('status'));
     }
     updateValues();
   }
@@ -1557,7 +1689,7 @@ body.mosaic-mode .single-only{display:none}
   }
   function exportSweep(){
     if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){
-      setStatus('This browser cannot export the sweep video yet.');
+      setStatus(state.lang==='zh'?'当前浏览器暂时不能导出扫光视频。':'This browser cannot export the sweep video yet.');
       return;
     }
     if(state.sweep)toggleSweep();
@@ -1565,7 +1697,7 @@ body.mosaic-mode .single-only{display:none}
     var startAngle=state.angle, baseAngle=state.angle, duration=state.sweepDuration*1000, chunks=[], mime=recorderType();
     out.width=size[0]; out.height=size[1];
     var stream=out.captureStream(30), recorder;
-    try{recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined)}catch(err){setStatus('Video export could not start in this browser.');return}
+    try{recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined)}catch(err){setStatus(state.lang==='zh'?'当前浏览器无法开始视频导出。':'Video export could not start in this browser.');return}
     button.disabled=true; button.textContent=tr('renderingSweep'); setStatus((state.lang==='zh'?'正在渲染 ':'Rendering ')+state.sweepDuration+(state.lang==='zh'?' 秒扫光，尺寸 ':' second light sweep at ')+out.width+' x '+out.height+'.');
     recorder.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
     recorder.onstop=function(){
@@ -1586,7 +1718,7 @@ body.mosaic-mode .single-only{display:none}
     }
     requestAnimationFrame(frame);
   }
-  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
+  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(state.composition==='single'&&['reliefScale','reliefX','reliefY'].indexOf(id)>=0){var source=sourceAt(0);source.panelScale=state.reliefScale;source.panelX=state.reliefX;source.panelY=state.reliefY}if(['soft','contrast','threshold','bevel','roundBevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail','grooveShadow','roundBevel'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
   document.querySelectorAll('[data-finish]').forEach(function(b){b.addEventListener('click',function(){
     state.finish=b.dataset.finish;
     var preset=finishPresets[state.finish]||finishPresets.natural;
@@ -1614,13 +1746,15 @@ body.mosaic-mode .single-only{display:none}
     }
     clearTextureCache();updateValues();schedule();
   });
-  document.getElementById('invert').addEventListener('change',function(){readState('invert');clearHeightCaches();schedule()});
-  document.querySelectorAll('[data-source]').forEach(function(b){b.onclick=function(){state.source=b.dataset.source;clearHeightCaches();updateValues();schedule()}});
+  document.getElementById('invert').addEventListener('change',function(){readState('invert');clearHeightCaches();schedule();updateSubjectHint()});
+  document.getElementById('subjectFill').addEventListener('change',function(){readState('subjectFill')});
+  document.querySelectorAll('[data-source]').forEach(function(b){b.onclick=function(){state.source=b.dataset.source;clearHeightCaches();updateValues();schedule();updateSubjectHint()}});
   document.querySelectorAll('[data-composition]').forEach(function(b){b.onclick=function(){
     state.composition=b.dataset.composition;
     if(state.composition==='mosaic'&&!mosaicLayout.length) shuffleMosaic();
     updateValues(); schedule();
-    setStatus(state.composition==='mosaic'?'Click a plus to load a panel. Drag to place, wheel to resize, right-click to remove.':'Drag across the preview to move the light.');
+    updateSubjectHint();
+    setStatus(compositionStatus());
   }});
   document.getElementById('file').addEventListener('change',function(){fileLoad(this.files[0])});
   document.getElementById('dropZone').addEventListener('click',function(e){
@@ -1630,9 +1764,15 @@ body.mosaic-mode .single-only{display:none}
   [0,1,2,3].forEach(function(index){document.getElementById('panelFile'+index).addEventListener('change',function(){panelLoad(this.files[0],index)})});
   document.getElementById('canvasRatio').addEventListener('change',function(){readState('canvasRatio');schedule()});
   document.getElementById('exportSize').addEventListener('change',updateExportControls);
-  document.getElementById('mosaicCount').addEventListener('change',function(){state.mosaicCount=+this.value;shuffleMosaic();updateValues();setStatus(state.mosaicCount+' panel grid ready.')});
-  document.getElementById('shuffleMosaic').addEventListener('click',function(){shuffleMosaic();setStatus('Grid shuffled. Each panel keeps its uploaded relief.')});
-  document.getElementById('centerRelief').addEventListener('click',function(){state.reliefX=0;state.reliefY=0;document.getElementById('reliefX').value=0;document.getElementById('reliefY').value=0;updateValues();schedule()});
+  document.getElementById('mosaicCount').addEventListener('change',function(){state.mosaicCount=+this.value;shuffleMosaic();updateValues();setStatus(state.lang==='zh'?state.mosaicCount+' 个面板网格已准备好。':state.mosaicCount+' panel grid ready.')});
+  document.getElementById('shuffleMosaic').addEventListener('click',function(){shuffleMosaic();setStatus(state.lang==='zh'?'网格已随机重排，已上传的浮雕会保留。':'Grid shuffled. Each panel keeps its uploaded relief.')});
+  document.getElementById('centerRelief').addEventListener('click',function(){
+    state.reliefScale=100;state.reliefX=0;state.reliefY=0;
+    panelSources.forEach(function(source){source.panelScale=100;source.panelX=0;source.panelY=0});
+    document.getElementById('reliefScale').value=100;document.getElementById('reliefX').value=0;document.getElementById('reliefY').value=0;
+    updateValues();schedule();
+    setStatus(tr('resetDone'));
+  });
   document.getElementById('sweep').addEventListener('click',toggleSweep);
   document.getElementById('exportHeightMap').addEventListener('click',exportHeightMapPng);
   document.getElementById('exportSubject').addEventListener('click',exportSubjectPng);
@@ -1642,11 +1782,11 @@ body.mosaic-mode .single-only{display:none}
   document.getElementById('clearOverlay').addEventListener('click',function(){overlayReady=false;overlay.src='';lastOverlayRect=null;document.getElementById('overlayThumb').removeAttribute('src');document.getElementById('overlayThumbBox').classList.add('blank');document.getElementById('overlayName').textContent='Transparent overlay';schedule()});
   ['dragenter','dragover'].forEach(function(type){stage.addEventListener(type,function(e){e.preventDefault();stage.style.outline='2px solid var(--accent)'})});
   ['dragleave','drop'].forEach(function(type){stage.addEventListener(type,function(e){e.preventDefault();stage.style.outline='';if(type==='drop')fileLoad(e.dataTransfer.files[0])})});
-  stage.addEventListener('auxclick',function(e){if(state.composition==='mosaic'&&e.button===1)e.preventDefault()});
+  stage.addEventListener('auxclick',function(e){if(e.button===1)e.preventDefault()});
   stage.addEventListener('wheel',resizeAtPointer,{passive:false});
   stage.addEventListener('contextmenu',removeMosaicPanel);
   stage.addEventListener('pointerdown',startStageDrag);
-  stage.addEventListener('pointermove',function(e){if(mosaicDrag)moveMosaicPanel(e);else if(overlayDrag)moveOverlay(e);else if(e.buttons&&state.composition!=='mosaic')moveLight(e)});
+  stage.addEventListener('pointermove',function(e){if(mosaicDrag)moveMosaicPanel(e);else if(overlayDrag)moveOverlay(e);else if(e.buttons&&state.composition!=='mosaic'&&!sourceAt(0).userLoaded)moveLight(e)});
   stage.addEventListener('pointerup',stopStageDrag);stage.addEventListener('pointercancel',stopStageDrag);
   function canvasPoint(e){var r=preview.getBoundingClientRect();return {x:(e.clientX-r.left)*preview.width/r.width,y:(e.clientY-r.top)*preview.height/r.height}}
   function mosaicRectAt(p){
@@ -1655,6 +1795,9 @@ body.mosaic-mode .single-only{display:none}
       if(p.x>=rect.x&&p.x<=rect.x+rect.w&&p.y>=rect.y&&p.y<=rect.y+rect.h)return rect;
     }
     return null;
+  }
+  function singleRectAt(p){
+    return lastSingleRect&&p.x>=lastSingleRect.x&&p.x<=lastSingleRect.x+lastSingleRect.w&&p.y>=lastSingleRect.y&&p.y<=lastSingleRect.y+lastSingleRect.h?lastSingleRect:null;
   }
   function overlayRectAt(p){
     return overlayReady&&lastOverlayRect&&p.x>=lastOverlayRect.x&&p.x<=lastOverlayRect.x+lastOverlayRect.w&&p.y>=lastOverlayRect.y&&p.y<=lastOverlayRect.y+lastOverlayRect.h;
@@ -1666,11 +1809,21 @@ body.mosaic-mode .single-only{display:none}
       state.overlayScale=clamp(state.overlayScale+(e.deltaY<0?8:-8),1,260);
       document.getElementById('overlayScale').value=state.overlayScale;
       updateValues(); schedule();
-      setStatus('Overlay scale '+state.overlayScale+'%.');
+      setStatus(tr('overlayScaleStatus')+state.overlayScale+'%.');
       return;
     }
-    if(state.composition!=='mosaic')return;
-    resizeMosaicPanel(e,p);
+    if(state.composition==='mosaic') resizeMosaicPanel(e,p);
+    else resizeSingleImage(e,p);
+  }
+  function resizeSingleImage(e,p){
+    var rect=singleRectAt(p), source=sourceAt(0);
+    if(!rect||!source.userLoaded)return;
+    e.preventDefault();
+    var delta=e.deltaY<0?9:-9;
+    source.panelScale=clamp(source.panelScale+delta,5,360);
+    state.reliefScale=source.panelScale;document.getElementById('reliefScale').value=Math.round(state.reliefScale);
+    updateValues();schedule();
+    setStatus(tr('reliefScaleStatus')+Math.round(source.panelScale)+'%.');
   }
   function resizeMosaicPanel(e,p){
     var panel=mosaicRectAt(p);
@@ -1679,7 +1832,7 @@ body.mosaic-mode .single-only{display:none}
     var source=sourceAt(panel.index), delta=e.deltaY<0?9:-9;
     source.panelScale=clamp(source.panelScale+delta,5,360);
     schedule();
-    setStatus('Panel '+(panel.index+1)+' scale '+source.panelScale+'%.');
+    setStatus((state.lang==='zh'?'面板 ':'Panel ')+(panel.index+1)+(state.lang==='zh'?' 缩放 ':' scale ')+source.panelScale+'%.');
   }
   function removeMosaicPanel(e){
     if(state.composition!=='mosaic')return;
@@ -1715,10 +1868,29 @@ body.mosaic-mode .single-only{display:none}
           };
           stage.setPointerCapture(e.pointerId);
           preview.style.cursor=e.button===1?'ns-resize':'move';
-          setStatus(e.button===1?'Resize this relief.':'Move this relief inside its crop.');
+          setStatus(e.button===1?tr('resizeRelief'):tr('moveRelief'));
         }
       }
       return;
+    }
+    var rect=singleRectAt(p), singleSource=sourceAt(0);
+    if(rect){
+      if(!singleSource.userLoaded&&e.button===0){
+        document.getElementById('file').click();
+        return;
+      }
+      if(singleSource.userLoaded&&(e.button===0||e.button===1)){
+        e.preventDefault();
+        mosaicDrag={
+          pointer:e.pointerId,x:p.x,y:p.y,rect:rect,index:0,
+          mode:e.button===1?'scale':'move',
+          scale:singleSource.panelScale,panelX:singleSource.panelX,panelY:singleSource.panelY
+        };
+        stage.setPointerCapture(e.pointerId);
+        preview.style.cursor=e.button===1?'ns-resize':'move';
+        setStatus(e.button===1?tr('resizeRelief'):tr('moveRelief'));
+        return;
+      }
     }
     if(state.sweep)toggleSweep();
     moveLight(e);
@@ -1731,6 +1903,13 @@ body.mosaic-mode .single-only{display:none}
     }else{
       source.panelX=clamp(mosaicDrag.panelX+dx/Math.max(1,mosaicDrag.rect.w)*100,-220,220);
       source.panelY=clamp(mosaicDrag.panelY+dy/Math.max(1,mosaicDrag.rect.h)*100,-220,220);
+    }
+    if(state.composition==='single'&&mosaicDrag.index===0){
+      state.reliefScale=source.panelScale;state.reliefX=source.panelX;state.reliefY=source.panelY;
+      document.getElementById('reliefScale').value=Math.round(state.reliefScale);
+      document.getElementById('reliefX').value=Math.round(state.reliefX);
+      document.getElementById('reliefY').value=Math.round(state.reliefY);
+      updateValues();
     }
     schedule();
   }
@@ -1767,7 +1946,7 @@ body.mosaic-mode .single-only{display:none}
   function moveLight(e){var r=stage.getBoundingClientRect();state.angle=Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI);document.getElementById('angle').value=state.angle;updateValues();schedule()}
   document.getElementById('export').onclick=exportPng;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal(helpModal);if(licenseUnlocked)closeModal(licenseModal)}});
-  setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();seed();new ResizeObserver(resizePreview).observe(stage);
+  setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();new ResizeObserver(resizePreview).observe(stage);
 })();
 </script>
 </body>
