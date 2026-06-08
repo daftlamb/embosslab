@@ -428,6 +428,10 @@ body.mosaic-mode .single-only{display:none}
         <input id="textureScale" type="range" min="0" max="100" value="58">
         <div class="row"><label for="textureDetail">Texture detail</label><span class="value" id="textureDetailVal"></span></div>
         <input id="textureDetail" type="range" min="0" max="100" value="42">
+        <div class="row"><label for="reflectionScale">Reflection scale</label><span class="value" id="reflectionScaleVal"></span></div>
+        <input id="reflectionScale" type="range" min="0" max="100" value="50">
+        <div class="row"><label for="reflectionAngle">Reflection angle</label><span class="value" id="reflectionAngleVal"></span></div>
+        <input id="reflectionAngle" type="range" min="-180" max="180" value="0">
       </section>
       <section class="group">
         <h2 class="title">Finish</h2>
@@ -582,7 +586,7 @@ body.mosaic-mode .single-only{display:none}
   var state = {
     source:'luma', invert:false, subjectFill:'off', subjectSoft:22, height:48, soft:10, contrast:118, threshold:6, bevel:34,
     angle:-42, lightHeight:58, ambient:42, shine:72, sweepDuration:4, sweep:false, grain:24, rough:38,
-    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42,
+    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42, reflectionScale:50, reflectionAngle:0,
     composition:'single', mosaicCount:4,
     canvasRatio:'free', reliefScale:100, reliefX:0, reliefY:0, grooveShadow:42, roundBevel:45,
     overlayOpacity:88, overlayScale:100, overlayX:0, overlayY:0,
@@ -594,23 +598,23 @@ body.mosaic-mode .single-only{display:none}
     crisp:{finishSaturation:112,finishContrast:116,finishSharpness:34,finishClarity:22,finishHighlight:16,finishBloom:10,finishWarmth:4},
     gold:{finishSaturation:122,finishContrast:118,finishSharpness:28,finishClarity:26,finishHighlight:34,finishBloom:24,finishWarmth:36},
     product:{finishSaturation:116,finishContrast:124,finishSharpness:42,finishClarity:32,finishHighlight:24,finishBloom:16,finishWarmth:18},
-    jade:{finishSaturation:112,finishContrast:106,finishSharpness:8,finishClarity:18,finishHighlight:38,finishBloom:48,finishWarmth:-24,materialPatch:{material:'jade',base:'#b8d8c1',back:'#6f9783',grain:6,rough:22,shine:86,height:50,texture:'clouds',textureStrength:54,textureScale:72,textureDetail:36}},
-    cinema:{finishSaturation:118,finishContrast:92,finishSharpness:2,finishClarity:8,finishHighlight:58,finishBloom:76,finishWarmth:34}
+    jade:{finishSaturation:112,finishContrast:106,finishSharpness:8,finishClarity:18,finishHighlight:38,finishBloom:48,finishWarmth:-24,materialPatch:{material:'jade',base:'#b8d8c1',back:'#6f9783',grain:6,rough:22,shine:86,height:50,texture:'clouds',textureStrength:54,textureScale:72,textureDetail:36,reflectionScale:58,reflectionAngle:-20}},
+    cinema:{finishSaturation:118,finishContrast:96,finishSharpness:2,finishClarity:8,finishHighlight:64,finishBloom:78,finishWarmth:32}
   };
   var materials = {
-    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:8,rough:68,shine:42,height:52,texture:'clouds',textureStrength:46,textureScale:68,textureDetail:38},
-    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:34,rough:20,shine:92,height:52,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:16,rough:8,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:8,rough:9,shine:100,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50},
-    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    glazed:{name:'Glazed Tile',zh:'釉面瓷砖',base:'#8f071b',back:'#2d0309',grain:22,rough:7,shine:100,height:62,texture:'grainProc',textureStrength:20,textureScale:18,textureDetail:48},
-    stoneTile:{name:'Aged Stone',zh:'旧石砖',base:'#d8cbbb',back:'#b6a68f',grain:54,rough:72,shine:38,height:54,texture:'spots',textureStrength:44,textureScale:74,textureDetail:22},
-    jade:{name:'Jade Stone',zh:'玉石',base:'#b8d8c1',back:'#6f9783',grain:6,rough:22,shine:86,height:50,texture:'clouds',textureStrength:54,textureScale:72,textureDetail:36},
-    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58},
-    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42}
+    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:50,reflectionAngle:0},
+    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:8,rough:68,shine:42,height:52,texture:'clouds',textureStrength:46,textureScale:68,textureDetail:38,reflectionScale:50,reflectionAngle:0},
+    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:34,rough:20,shine:92,height:52,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:54,reflectionAngle:0},
+    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:16,rough:8,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:46,reflectionAngle:-12},
+    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:8,rough:9,shine:100,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:42,reflectionAngle:18},
+    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:50,reflectionAngle:0},
+    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50,reflectionScale:50,reflectionAngle:0},
+    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:50,reflectionAngle:0},
+    glazed:{name:'Glazed Tile',zh:'釉面瓷砖',base:'#8f071b',back:'#2d0309',grain:22,rough:7,shine:100,height:62,texture:'grainProc',textureStrength:20,textureScale:18,textureDetail:48,reflectionScale:40,reflectionAngle:-8},
+    stoneTile:{name:'Aged Stone',zh:'旧石砖',base:'#d8cbbb',back:'#b6a68f',grain:54,rough:72,shine:38,height:54,texture:'spots',textureStrength:44,textureScale:74,textureDetail:22,reflectionScale:50,reflectionAngle:0},
+    jade:{name:'Jade Stone',zh:'玉石',base:'#b8d8c1',back:'#6f9783',grain:6,rough:22,shine:86,height:50,texture:'clouds',textureStrength:54,textureScale:72,textureDetail:36,reflectionScale:58,reflectionAngle:-20},
+    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58,reflectionScale:50,reflectionAngle:0},
+    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:50,reflectionAngle:0}
   };
   var i18n = {
     en:{
@@ -620,7 +624,7 @@ body.mosaic-mode .single-only{display:none}
       lighting:'Lighting',angle:'Angle',lightHeight:'Light height',ambient:'Ambient',shine:'Highlight',sweepDuration:'Sweep duration',previewSweep:'Preview Light Sweep',stopSweep:'Stop Light Sweep',
       composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Reset View',single:'Single',mosaic:'Mosaic',shuffle:'Shuffle Grid',
       panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',grooveShadow:'Groove shadow',roundBevel:'Round bevel',
-      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
+      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',reflectionScale:'Reflection scale',reflectionAngle:'Reflection angle',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',finishNatural:'Natural',finishCrisp:'Crisp',finishGold:'Warm Gold',finishProduct:'Product',finishJade:'Jade',finishCinema:'Cinema Glow',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
       exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Click the plus to load an image.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',subjectFill:'Subject fill',fillOff:'Keep holes',fillSmall:'Small gaps',fillSolid:'Solid fill',subjectSoft:'Subject edge',
@@ -643,7 +647,7 @@ body.mosaic-mode .single-only{display:none}
       lighting:'灯光',angle:'角度',lightHeight:'灯光高度',ambient:'环境光',shine:'高光',sweepDuration:'扫光时长',previewSweep:'预览扫光',stopSweep:'停止扫光',
       composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'重置构图',single:'单图',mosaic:'拼版',shuffle:'随机网格',
       panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',grooveShadow:'凹槽阴影',roundBevel:'圆润倒角',
-      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
+      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',reflectionScale:'反射尺度',reflectionAngle:'反射角度',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
       exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'点击加号载入图片。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',subjectFill:'主体填充',fillOff:'保留镂空',fillSmall:'小缺口',fillSolid:'实心填充',subjectSoft:'主体边缘',
       singleReady:'左键拖动移动图像，中键拖动或滚轮缩放。',singleEmpty:'点击加号载入图片。',mosaicReady:'点击加号载入面板；拖动定位，滚轮缩放，右键移除。',mosaicLoaded:'拖动浮雕调整位置，滚轮缩放。',resetDone:'构图已重置。',resizeRelief:'缩放这个浮雕。',moveRelief:'移动这个浮雕。',reliefScaleStatus:'浮雕缩放 ',overlayScaleStatus:'叠加图缩放 ',
@@ -679,7 +683,7 @@ body.mosaic-mode .single-only{display:none}
       ['.scroll .group:nth-of-type(2) .title','relief'],['label[for="height"]','height'],['label[for="soft"]','soft'],['label[for="contrast"]','contrast'],['label[for="threshold"]','threshold'],['label[for="bevel"]','bevel'],
       ['.scroll .group:nth-of-type(3) .title','lighting'],['label[for="angle"]','angle'],['label[for="lightHeight"]','lightHeight'],['label[for="ambient"]','ambient'],['label[for="shine"]','shine'],['label[for="sweepDuration"]','sweepDuration'],
       ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],['label[for="grooveShadow"]','grooveShadow'],['label[for="roundBevel"]','roundBevel'],
-      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
+      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],['label[for="reflectionScale"]','reflectionScale'],['label[for="reflectionAngle"]','reflectionAngle'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['[data-finish="natural"]','finishNatural'],['[data-finish="crisp"]','finishCrisp'],['[data-finish="gold"]','finishGold'],['[data-finish="product"]','finishProduct'],['[data-finish="jade"]','finishJade'],['[data-finish="cinema"]','finishCinema'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
       ['#export','exportPng'],['#exportHeightMap','exportHeightMap'],['#exportSubject','exportSubject'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
@@ -721,8 +725,8 @@ body.mosaic-mode .single-only{display:none}
   function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null;source.alphaMask=null;source.alphaStats=null})}
   function clearTextureCache(){textureCache.key='';textureCache.canvas=null}
   function updateValues(){
-    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){
-      var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+(id==='angle'?' deg':(id==='sweepDuration'?' s':''));
+    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reflectionScale','reflectionAngle','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){
+      var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+((id==='angle'||id==='reflectionAngle')?' deg':(id==='sweepDuration'?' s':''));
     });
     document.getElementById('base').value=state.base;
     document.getElementById('back').value=state.back;
@@ -889,8 +893,12 @@ body.mosaic-mode .single-only{display:none}
       var metalReflect=0, metalEdge=0, brushed=0, toxicFlow=0, toxicRim=0, toxicPit=0, chromeCurve=0;
       if(reflectiveMetal){
         var ux=px/Math.max(1,w), uy=py/Math.max(1,h);
-        var bandA=(Math.sin((uy*5.6+nx*1.9+state.angle*.009)*Math.PI*2)+1)*.5;
-        var bandB=(Math.sin((ux*2.1-uy*1.25+ny*2.3)*Math.PI*2)+1)*.5;
+        var reflectAngle=state.reflectionAngle*Math.PI/180;
+        var reflectScale=mix(2.4,10.8,state.reflectionScale/100);
+        var ru=(ux-.5)*Math.cos(reflectAngle)-(uy-.5)*Math.sin(reflectAngle);
+        var rv=(ux-.5)*Math.sin(reflectAngle)+(uy-.5)*Math.cos(reflectAngle);
+        var bandA=(Math.sin((rv*reflectScale+nx*1.9+state.angle*.009)*Math.PI*2)+1)*.5;
+        var bandB=(Math.sin((rv*reflectScale*.42+ru*1.35+ny*2.3)*Math.PI*2)+1)*.5;
         metalEdge=smoothstep(.08,.95,edge+Math.abs(nx)*.62+Math.abs(ny)*.62);
         brushed=(noise(px*.055,py*.95)-.5)*mix(22,4,rough);
         metalReflect=clamp(bandA*.52+bandB*.24+metalEdge*.42+spec*.55,0,1)*(1-rough*.55);
@@ -980,35 +988,48 @@ body.mosaic-mode .single-only{display:none}
     }
     ctx.putImageData(img,0,0);
     if(bloom){
+      var mask=document.createElement('canvas'), mctx=mask.getContext('2d');
+      mask.width=w;mask.height=h;
       var glow=document.createElement('canvas'), gctx=glow.getContext('2d');
       glow.width=w;glow.height=h;
-      var glowImg=ctx.getImageData(0,0,w,h), gd=glowImg.data;
-      var threshold=128-bloom*42, range=112-bloom*42;
+      var source=document.createElement('canvas'), sctx=source.getContext('2d');
+      source.width=w;source.height=h;sctx.putImageData(ctx.getImageData(0,0,w,h),0,0);
+      var localBlur=document.createElement('canvas'), lbctx=localBlur.getContext('2d');
+      localBlur.width=w;localBlur.height=h;
+      lbctx.filter='blur('+Math.max(2,Math.round(Math.min(w,h)*.006))+'px)';
+      lbctx.drawImage(source,0,0);
+      var glowImg=sctx.getImageData(0,0,w,h), gd=glowImg.data, bd=lbctx.getImageData(0,0,w,h).data;
       var tintWarm=clamp(warm,-1,1);
       for(var j=0;j<gd.length;j+=4){
-        var l=.299*gd[j]+.587*gd[j+1]+.114*gd[j+2], m=smoothstep(threshold,threshold+Math.max(34,range),l);
-        m=Math.pow(m,.72);
+        var l=.299*gd[j]+.587*gd[j+1]+.114*gd[j+2];
+        var bl=.299*bd[j]+.587*bd[j+1]+.114*bd[j+2];
+        var local=smoothstep(3,30,l-bl);
+        var bright=smoothstep(92-bloom*18,178-bloom*22,l);
+        var peak=smoothstep(150-bloom*18,236-bloom*20,l);
+        var m=Math.pow(local*mix(.46,1.18,bright)+peak*.42,.68);
         var r=gd[j], g=gd[j+1], b=gd[j+2];
         if(tintWarm>0){
           r=mix(r,255,tintWarm*.22);
-          g=mix(g,210,tintWarm*.13);
-          b=mix(b,135,tintWarm*.1);
+          g=mix(g,220,tintWarm*.13);
+          b=mix(b,150,tintWarm*.1);
         }else if(tintWarm<0){
           var cool=-tintWarm;
-          r=mix(r,135,cool*.1);
-          g=mix(g,225,cool*.2);
-          b=mix(b,205,cool*.18);
+          r=mix(r,145,cool*.1);
+          g=mix(g,230,cool*.18);
+          b=mix(b,220,cool*.18);
         }
-        gd[j]=r*m;gd[j+1]=g*m;gd[j+2]=b*m;gd[j+3]=m*255*bloom*.95;
+        gd[j]=r*m*1.08;gd[j+1]=g*m*1.08;gd[j+2]=b*m*1.08;gd[j+3]=m*255*bloom;
       }
-      gctx.putImageData(glowImg,0,0);
+      mctx.putImageData(glowImg,0,0);
+      gctx.filter='blur('+Math.max(1,Math.round(Math.min(w,h)*.0028))+'px)';
+      gctx.drawImage(mask,0,0);
       ctx.save();
       ctx.globalCompositeOperation='screen';
-      ctx.globalAlpha=.42+bloom*.68;
-      ctx.filter='blur('+Math.round(Math.min(w,h)*(.008+bloom*.02))+'px)';
+      ctx.globalAlpha=.28+bloom*.46;
+      ctx.filter='blur('+Math.max(1,Math.round(Math.min(w,h)*(.004+bloom*.011)))+'px)';
       ctx.drawImage(glow,0,0);
-      ctx.globalAlpha=.18+bloom*.34;
-      ctx.filter='blur('+Math.round(Math.min(w,h)*(.026+bloom*.035))+'px)';
+      ctx.globalAlpha=.14+bloom*.34;
+      ctx.filter='blur('+Math.round(Math.min(w,h)*(.018+bloom*.034))+'px)';
       ctx.drawImage(glow,0,0);
       ctx.restore();
     }
@@ -1622,7 +1643,7 @@ body.mosaic-mode .single-only{display:none}
   }
   function createMaterials(){
     var root=document.getElementById('materials');
-    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);if(key==='glazed'){state.grooveShadow=68;state.roundBevel=82}else if(key==='stoneTile'){state.grooveShadow=52;state.roundBevel=58}document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','textureStrength','textureScale','textureDetail','grooveShadow','roundBevel'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
+    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);if(key==='glazed'){state.grooveShadow=68;state.roundBevel=82}else if(key==='stoneTile'){state.grooveShadow=52;state.roundBevel=58}document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','textureStrength','textureScale','textureDetail','reflectionScale','reflectionAngle','grooveShadow','roundBevel'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
   }
   function animateSweep(time){
     if(!state.sweep)return;
@@ -1718,7 +1739,7 @@ body.mosaic-mode .single-only{display:none}
     }
     requestAnimationFrame(frame);
   }
-  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(state.composition==='single'&&['reliefScale','reliefX','reliefY'].indexOf(id)>=0){var source=sourceAt(0);source.panelScale=state.reliefScale;source.panelX=state.reliefX;source.panelY=state.reliefY}if(['soft','contrast','threshold','bevel','roundBevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail','grooveShadow','roundBevel'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
+  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reflectionScale','reflectionAngle','reliefScale','reliefX','reliefY','grooveShadow','roundBevel','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth','subjectSoft'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(state.composition==='single'&&['reliefScale','reliefX','reliefY'].indexOf(id)>=0){var source=sourceAt(0);source.panelScale=state.reliefScale;source.panelX=state.reliefX;source.panelY=state.reliefY}if(['soft','contrast','threshold','bevel','roundBevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail','grooveShadow','roundBevel'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
   document.querySelectorAll('[data-finish]').forEach(function(b){b.addEventListener('click',function(){
     state.finish=b.dataset.finish;
     var preset=finishPresets[state.finish]||finishPresets.natural;
@@ -1727,7 +1748,7 @@ body.mosaic-mode .single-only{display:none}
       Object.assign(state,preset.materialPatch);
       document.getElementById('base').value=state.base;
       document.getElementById('back').value=state.back;
-      ['height','grain','rough','shine','textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});
+      ['height','grain','rough','shine','textureStrength','textureScale','textureDetail','reflectionScale','reflectionAngle'].forEach(function(id){document.getElementById(id).value=state[id]});
       document.getElementById('surfaceTexture').value=state.texture;
       clearTextureCache();
     }
