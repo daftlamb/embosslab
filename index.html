@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Emboss Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&amp;family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Great+Vibes&amp;family=Instrument+Serif:ital@0;1&amp;family=Inter:ital,wght@0,300..900;1,300..900&amp;family=Montserrat:ital,wght@0,300..900;1,300..900&amp;family=Outfit:wght@300..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Roboto:ital,wght@0,300..900;1,300..900&amp;display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
 :root{
   --bg:#eee8e1;
   --panel:#faf6f1;
@@ -27,7 +29,7 @@ body{
     radial-gradient(circle at 88% 90%, rgba(156,101,79,.1), transparent 30%),
     var(--bg);
 }
-button,input,select{font:inherit}
+button,input,select,textarea{font:inherit}
 .app{height:100%;display:grid;grid-template-columns:330px minmax(0,1fr)}
 .panel{
   min-height:0;
@@ -73,6 +75,28 @@ h1{margin:7px 0 5px;font:400 37px/1 'Instrument Serif',Georgia,serif;letter-spac
 .upload strong,.upload small{display:block}
 .upload strong{font-size:12px;font-weight:600;margin-bottom:3px}
 .upload small{font-size:11px;color:var(--muted);line-height:1.4}
+.source-modes{margin-bottom:8px}
+.type-only{display:none}
+body.type-mode .type-only{display:grid}
+body.type-mode .image-only{display:none!important}
+.type-tools{gap:8px}
+.type-copy{display:grid;gap:5px;color:var(--muted);font-size:11px}
+.type-copy textarea{width:100%;min-height:76px;max-height:280px;resize:vertical;overflow:auto;padding:9px;border:1px solid var(--line);border-radius:6px;background:#fffaf5;color:var(--text);line-height:1.35}
+.type-copy textarea::-webkit-resizer{background:linear-gradient(135deg,transparent 0 48%,#a6907c 50% 58%,transparent 60% 68%,#a6907c 70% 78%,transparent 80%)}
+.seg.type-align{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%}
+.type-align .btn{display:grid;min-height:30px;width:100%;padding:0;place-items:center}
+.type-align svg{width:16px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}
+.font-upload{position:relative;min-height:44px;display:flex;align-items:center;padding:8px 10px;border:1px dashed #c8b7a7;border-radius:6px;background:var(--surface);cursor:pointer}
+.font-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.font-upload span{min-width:0}
+.font-upload strong,.font-upload small{display:block}
+.font-upload strong{font-size:11px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.font-upload small{font-size:10px;color:var(--muted)}
+body.type-mode #panelThumb0{object-fit:contain;padding:4px;background:#fff}
+.metal-only{display:none}
+body.metal-mode .metal-only{display:block}
+.metal-controls{margin-top:9px;padding:9px 10px 7px;border:1px solid var(--line);border-radius:6px;background:rgba(245,239,231,.7)}
+.metal-controls .row:first-child{margin-top:0}
 .row{display:grid;grid-template-columns:1fr 42px;align-items:center;gap:8px;margin-top:8px}
 .row label{font-size:12px;color:var(--text)}
 .value{text-align:right;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
@@ -131,9 +155,18 @@ input[type=color]{padding:4px;cursor:pointer}
 .mosaic-slot strong,.mosaic-slot small{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mosaic-slot strong{font-size:11px;font-weight:600}
 .mosaic-slot small{margin-top:3px;color:var(--muted);font-size:10px}
+.pattern-tools{display:grid;gap:0;margin-top:10px}
+.pattern-tools .grid2{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.pattern-tools .toggle{min-height:34px;margin:0;gap:8px;padding:0 2px;white-space:nowrap}
+.composition-modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.mosaic-mode .composition-head,body.pattern-mode .composition-head{grid-template-columns:1fr}
 .mosaic-only{display:none}
+.pattern-only{display:none}
 body.mosaic-mode .mosaic-only{display:grid}
-body.mosaic-mode .single-only{display:none}
+body.pattern-mode .pattern-only{display:grid}
+body.mosaic-mode .single-only,body.pattern-mode .single-only{display:none}
+.btn.pattern-action{display:none}
+body.pattern-mode .btn.pattern-action{display:flex}
 .mosaic-hidden{display:none}
 .stage-shell{min-width:0;min-height:0;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr)}
 .toolbar{
@@ -286,7 +319,7 @@ body.mosaic-mode .single-only{display:none}
 }
 </style>
 </head>
-<body>
+<body class="type-mode">
 <div class="app">
   <aside class="panel">
     <div class="brand">
@@ -297,16 +330,64 @@ body.mosaic-mode .single-only{display:none}
     <div class="scroll">
       <section class="group">
         <h2 class="title">Image</h2>
-        <label class="upload" id="dropZone">
+        <div class="seg source-modes">
+          <button class="btn" data-input-mode="image" type="button">Image</button>
+          <button class="btn active" data-input-mode="type" type="button">Type / Monogram</button>
+        </div>
+        <label class="upload image-only" id="dropZone">
           <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
           <img id="thumb" class="thumb" alt="">
           <span><strong id="fileName">Upload image</strong><small>PNG alpha or grayscale works best. Drop an image here.</small></span>
         </label>
-        <div class="seg" style="margin-top:8px">
+        <div class="type-tools type-only">
+          <label class="type-copy"><span>Text / Monogram</span><textarea id="typeText" rows="3" spellcheck="false">EMBOSS LAB</textarea></label>
+          <div class="grid2">
+            <select id="typeFont" aria-label="Typeface">
+              <optgroup label="Sans Serif">
+                <option value="outfit">Outfit</option>
+                <option value="montserrat">Montserrat</option>
+                <option value="roboto">Roboto</option>
+                <option value="inter">Inter</option>
+              </optgroup>
+              <optgroup label="Serif">
+                <option value="ebGaramond" selected>EB Garamond</option>
+                <option value="playfair">Playfair Display</option>
+                <option value="cormorant">Cormorant Garamond</option>
+                <option value="instrument">Instrument Serif</option>
+              </optgroup>
+              <optgroup label="Script">
+                <option value="greatVibes">Great Vibes</option>
+              </optgroup>
+              <optgroup label="Handwriting">
+                <option value="caveat">Caveat</option>
+              </optgroup>
+              <option value="custom" id="typeFontCustom" hidden>Imported font</option>
+            </select>
+            <select id="typeWeight" aria-label="Font weight">
+              <option value="300">Light</option>
+              <option value="400" selected>Regular</option>
+              <option value="500">Medium</option>
+              <option value="700">Bold</option>
+              <option value="900">Black</option>
+            </select>
+          </div>
+          <div class="seg type-align" role="group" aria-label="Paragraph alignment">
+            <button class="btn" data-type-align="left" type="button" aria-label="Left" title="Left" aria-pressed="false"><svg viewBox="0 0 18 15" aria-hidden="true"><path d="M1.5 1.5h15M1.5 5.5h9M1.5 9.5h15M1.5 13.5h11"/></svg></button>
+            <button class="btn active" data-type-align="center" type="button" aria-label="Center" title="Center" aria-pressed="true"><svg viewBox="0 0 18 15" aria-hidden="true"><path d="M1.5 1.5h15M4.5 5.5h9M1.5 9.5h15M3.5 13.5h11"/></svg></button>
+            <button class="btn" data-type-align="right" type="button" aria-label="Right" title="Right" aria-pressed="false"><svg viewBox="0 0 18 15" aria-hidden="true"><path d="M1.5 1.5h15M7.5 5.5h9M1.5 9.5h15M5.5 13.5h11"/></svg></button>
+          </div>
+          <label class="font-upload"><input id="typeFontFile" type="file" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"><span><strong id="typeFontName">Import font</strong><small>TTF, OTF, WOFF, or WOFF2</small></span></label>
+          <div class="row"><label for="typeTracking">Tracking</label><span class="value" id="typeTrackingVal"></span></div>
+          <input id="typeTracking" type="range" min="-30" max="140" value="0">
+          <div class="row"><label for="typeLineHeight">Line spacing</label><span class="value" id="typeLineHeightVal"></span></div>
+          <input id="typeLineHeight" type="range" min="65" max="220" value="116">
+          <label class="toggle"><span id="typeItalicLabel">Italic</span><input id="typeItalic" type="checkbox"></label>
+        </div>
+        <div class="seg image-only" style="margin-top:8px">
           <button class="btn active" data-source="luma" type="button">Brightness</button>
           <button class="btn" data-source="alpha" type="button">Alpha</button>
         </div>
-        <div class="toggle"><span>Invert height</span><input id="invert" type="checkbox"></div>
+        <div class="toggle"><span id="invertLabel">Invert height</span><input id="invert" type="checkbox"></div>
       </section>
       <section class="group">
         <h2 class="title">Relief</h2>
@@ -337,20 +418,40 @@ body.mosaic-mode .single-only{display:none}
       </section>
       <section class="group">
         <h2 class="title">Composition</h2>
-        <div class="grid2">
+        <div class="grid2 composition-head">
           <select id="canvasRatio" aria-label="Canvas ratio">
             <option value="free">Source Ratio</option>
-            <option value="1">Square 1:1</option>
+            <option value="1" selected>Square 1:1</option>
             <option value="0.8">Portrait 4:5</option>
             <option value="0.75">Portrait 3:4</option>
             <option value="1.3333333">Landscape 4:3</option>
             <option value="1.7777778">Wide 16:9</option>
           </select>
-          <button class="btn" id="centerRelief" type="button">Center Relief</button>
+          <button class="btn single-only" id="centerRelief" type="button">Center Relief</button>
         </div>
-        <div class="seg" style="margin-top:8px">
+        <div class="seg composition-modes" style="margin-top:8px">
           <button class="btn active" data-composition="single" type="button">Single</button>
+          <button class="btn" data-composition="pattern" type="button">Pattern</button>
           <button class="btn" data-composition="mosaic" type="button">Mosaic</button>
+        </div>
+        <div class="pattern-tools pattern-only">
+          <div class="grid2">
+            <select id="patternLayout" aria-label="Pattern repeat">
+              <option value="grid">Grid</option>
+              <option value="brick">Brick</option>
+              <option value="halfDrop">Half-drop</option>
+              <option value="mirror">Mirror</option>
+            </select>
+            <label class="toggle"><span>Seamless edges</span><input id="patternSeamless" type="checkbox" checked></label>
+          </div>
+          <div class="row"><label for="patternSize">Motif size</label><span class="value" id="patternSizeVal"></span></div>
+          <input id="patternSize" type="range" min="8" max="64" value="26">
+          <div class="row"><label for="patternGap">Spacing</label><span class="value" id="patternGapVal"></span></div>
+          <input id="patternGap" type="range" min="-30" max="160" value="32">
+          <div class="row"><label for="patternRotation">Rotation</label><span class="value" id="patternRotationVal"></span></div>
+          <input id="patternRotation" type="range" min="-180" max="180" value="0">
+          <div class="row"><label for="patternOffset">Stagger</label><span class="value" id="patternOffsetVal"></span></div>
+          <input id="patternOffset" type="range" min="0" max="100" value="50">
         </div>
         <div class="mosaic-tools mosaic-only">
           <div class="grid2">
@@ -367,12 +468,12 @@ body.mosaic-mode .single-only{display:none}
             <label class="mosaic-slot"><input id="panelFile3" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><img class="mosaic-thumb" id="panelThumb3" alt=""><span><strong id="panelName3">Panel 4</strong><small>Upload image</small></span></label>
           </div>
         </div>
-        <div class="row"><label for="reliefScale">Relief scale</label><span class="value" id="reliefScaleVal"></span></div>
-        <input id="reliefScale" type="range" min="5" max="165" value="100">
-        <div class="row"><label for="reliefX">Horizontal</label><span class="value" id="reliefXVal"></span></div>
-        <input id="reliefX" type="range" min="-100" max="100" value="0">
-        <div class="row"><label for="reliefY">Vertical</label><span class="value" id="reliefYVal"></span></div>
-        <input id="reliefY" type="range" min="-100" max="100" value="0">
+        <div class="row single-only"><label for="reliefScale">Relief scale</label><span class="value" id="reliefScaleVal"></span></div>
+        <input class="single-only" id="reliefScale" type="range" min="5" max="165" value="100">
+        <div class="row single-only"><label for="reliefX">Horizontal</label><span class="value" id="reliefXVal"></span></div>
+        <input class="single-only" id="reliefX" type="range" min="-100" max="100" value="0">
+        <div class="row single-only"><label for="reliefY">Vertical</label><span class="value" id="reliefYVal"></span></div>
+        <input class="single-only" id="reliefY" type="range" min="-100" max="100" value="0">
       </section>
       <section class="group">
         <h2 class="title">Material</h2>
@@ -385,6 +486,14 @@ body.mosaic-mode .single-only{display:none}
         <input id="grain" type="range" min="0" max="100" value="24">
         <div class="row"><label for="rough">Roughness</label><span class="value" id="roughVal"></span></div>
         <input id="rough" type="range" min="0" max="100" value="38">
+        <div class="metal-only metal-controls">
+          <div class="row"><label for="reflectionScale">Reflection size</label><span class="value" id="reflectionScaleVal"></span></div>
+          <input id="reflectionScale" type="range" min="0" max="100" value="74">
+          <div class="row"><label for="reflectionTexture">Reflection variation</label><span class="value" id="reflectionTextureVal"></span></div>
+          <input id="reflectionTexture" type="range" min="0" max="100" value="30">
+          <div class="row"><label for="reflectionRotation">Reflection rotation</label><span class="value" id="reflectionRotationVal"></span></div>
+          <input id="reflectionRotation" type="range" min="-180" max="180" value="0">
+        </div>
         <div class="row"><label for="surfaceTexture">Surface texture</label><span class="value"></span></div>
         <select id="surfaceTexture" aria-label="Surface texture">
           <option value="none">None</option>
@@ -453,6 +562,7 @@ body.mosaic-mode .single-only{display:none}
         <button class="btn primary icon" id="export" type="button">PNG</button>
         <button class="btn icon" id="exportHeightMap" type="button">Height Map</button>
         <button class="btn icon" id="exportSubject" type="button">Auto Subject</button>
+        <button class="btn icon wide pattern-action" id="exportPatternTile" type="button">Pattern Tile</button>
         <button class="btn icon wide" id="exportSweep" type="button">Export Light Sweep</button>
       </div>
       <div class="status" id="status">Drag across the preview to move the light.</div>
@@ -492,7 +602,7 @@ body.mosaic-mode .single-only{display:none}
         <div class="help-item"><h3>Quick Start / 快速开始</h3><p>Upload a PNG, JPG, WebP, or SVG. Use Brightness for normal images, Alpha for transparent logos. 导入图片后选择亮度或透明度作为高度来源。</p></div>
         <div class="help-item"><h3>Relief / 浮雕</h3><p>Height controls depth, Edge softness smooths edges, Base cut removes faint background, Edge swell adds raised bevel. 调节高度、柔边、底部裁切和边缘膨胀。</p></div>
         <div class="help-item"><h3>Composition / 构图</h3><p>Single is for one centered image. Mosaic blends multiple panels into one relief board. Drag the preview to move light. Single 适合单图，Mosaic 适合多图拼版。</p></div>
-        <div class="help-item"><h3>Material / 材质</h3><p>Choose a preset first, then fine tune color, grain, roughness, highlight, and surface texture. 先选预设，再微调颜色、颗粒和反光。</p></div>
+        <div class="help-item"><h3>Material / 材质</h3><p>Choose a preset first, then fine tune its surface. Metal presets also reveal reflection size and variation controls. 金属材质会额外显示反射尺寸和变化。</p></div>
         <div class="help-item"><h3>Overlay / 叠加</h3><p>Overlay keeps a PNG/WebP/SVG above the relief. Drag it on canvas, use mouse wheel or Scale to resize, Clear returns to Blank. 叠加图可拖动、缩放和清空。</p></div>
         <div class="help-item"><h3>Export / 导出</h3><p>PNG supports 1x, 2x, 4x, and Custom long-edge export. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x 和自定义长边导出。</p></div>
       </div>
@@ -531,9 +641,16 @@ body.mosaic-mode .single-only{display:none}
   var srcCanvas = document.createElement('canvas');
   var srcCtx = srcCanvas.getContext('2d', {willReadFrequently:true});
   var image = new Image();
-  var panelSources = [{image:image,canvas:srcCanvas,ctx:srcCtx,heightCache:null,blendMask:null,name:'sample relief',panelScale:100,panelX:0,panelY:0,userLoaded:false}];
+  var panelSources = [{image:image,canvas:srcCanvas,ctx:srcCtx,heightCache:null,blendMask:null,name:'sample relief',panelScale:100,panelX:0,panelY:0,userLoaded:false,generated:false}];
+  var patternCanvas = document.createElement('canvas');
+  var patternSource = {image:image,canvas:patternCanvas,ctx:patternCanvas.getContext('2d',{willReadFrequently:true}),heightCache:null,blendMask:null,name:'pattern',generated:true};
+  var patternCache = {key:'',metrics:null,fields:{},revision:0};
   var overlay = new Image();
   var loadedName = 'sample relief';
+  var imageUserLoaded = false;
+  var imageHeightSource = 'luma';
+  var customTypeFace = null;
+  var customTypeFamily = '';
   var overlayReady = false;
   var overlayDrag = null;
   var mosaicDrag = null;
@@ -543,16 +660,22 @@ body.mosaic-mode .single-only{display:none}
   var lastReliefFrame = null;
   var heightCache = null;
   var renderQueued = false;
+  var previewFast = false;
+  var previewRefineTimer = 0;
+  var typeRenderRevision = 0;
+  var typeRefineTimer = 0;
   var sweepFrame = 0;
   var sweepStart = 0;
   var sweepBase = 0;
   var licenseUnlocked = false;
   var state = {
-    source:'luma', invert:false, height:48, soft:10, contrast:118, threshold:6, bevel:34,
+    inputMode:'type', source:'alpha', invert:false, height:48, soft:10, contrast:118, threshold:6, bevel:34,
+    typeText:'EMBOSS LAB', typeFont:'ebGaramond', typeWeight:'400', typeTracking:0, typeLineHeight:116, typeAlign:'center', typeItalic:false,
     angle:-42, lightHeight:58, ambient:42, shine:72, sweepDuration:4, sweep:false, grain:24, rough:38,
-    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42,
+    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42, reflectionScale:74, reflectionTexture:30, reflectionRotation:0,
     composition:'single', mosaicCount:4,
-    canvasRatio:'free', reliefScale:100, reliefX:0, reliefY:0,
+    patternLayout:'grid', patternSize:26, patternGap:32, patternRotation:0, patternOffset:50, patternSeamless:true,
+    canvasRatio:'1', reliefScale:100, reliefX:0, reliefY:0,
     overlayOpacity:88, overlayScale:100, overlayX:0, overlayY:0,
     finish:'natural', finishSaturation:100, finishContrast:100, finishSharpness:0, finishClarity:0, finishHighlight:0, finishBloom:0, finishWarmth:0,
     lang:localStorage.getItem('embossLabLang')||'en'
@@ -564,59 +687,61 @@ body.mosaic-mode .single-only{display:none}
     product:{finishSaturation:116,finishContrast:124,finishSharpness:42,finishClarity:32,finishHighlight:24,finishBloom:16,finishWarmth:18}
   };
   var materials = {
-    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:8,rough:68,shine:42,height:52,texture:'clouds',textureStrength:46,textureScale:68,textureDetail:38},
-    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:34,rough:20,shine:92,height:52,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:16,rough:8,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:8,rough:9,shine:100,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50},
-    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42},
-    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58},
-    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42}
+    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:8,rough:68,shine:42,height:52,texture:'clouds',textureStrength:46,textureScale:68,textureDetail:38,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:34,rough:20,shine:92,height:52,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:72,reflectionTexture:30,reflectionRotation:0},
+    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:16,rough:8,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:64,reflectionTexture:22,reflectionRotation:0},
+    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:8,rough:9,shine:100,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:52,reflectionTexture:68,reflectionRotation:0},
+    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:88,reflectionTexture:18,reflectionRotation:0},
+    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0}
   };
   var i18n = {
     en:{
       eyebrow:'Relief Surface Tool',brand:'Turn a mark, sketch, or monochrome image into a lightable relief surface.',
-      image:'Image',upload:'Upload image',uploadHint:'PNG alpha or grayscale works best. Drop an image here.',brightness:'Brightness',alpha:'Alpha',invert:'Invert height',
+      image:'Source',imageMode:'Image',typeMode:'Type / Monogram',typeText:'Text / Monogram',typeFontImport:'Import font',typeFontHint:'TTF, OTF, WOFF, or WOFF2',fontSans:'Sans Serif',fontSerif:'Serif',fontScript:'Script',fontHandwriting:'Handwriting',tracking:'Tracking',lineSpacing:'Line spacing',paragraphAlign:'Paragraph alignment',alignLeft:'Left',alignCenter:'Center',alignRight:'Right',italic:'Italic',fontLight:'Light',fontRegular:'Regular',fontMedium:'Medium',fontBold:'Bold',fontBlack:'Black',upload:'Upload image',uploadHint:'PNG alpha or grayscale works best. Drop an image here.',brightness:'Brightness',alpha:'Alpha',invert:'Invert height',
       relief:'Relief',height:'Height',soft:'Edge softness',contrast:'Contrast',threshold:'Base cut',bevel:'Edge swell',
       lighting:'Lighting',angle:'Angle',lightHeight:'Light height',ambient:'Ambient',shine:'Highlight',sweepDuration:'Sweep duration',previewSweep:'Preview Light Sweep',stopSweep:'Stop Light Sweep',
-      composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Center Relief',single:'Single',mosaic:'Mosaic',shuffle:'Shuffle Grid',
+      composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Center Relief',single:'Single',pattern:'Pattern',mosaic:'Mosaic',shuffle:'Shuffle Grid',
+      patternLayout:'Repeat layout',patternGrid:'Grid',patternBrick:'Brick',patternHalfDrop:'Half-drop',patternMirror:'Mirror',patternSize:'Motif size',patternGap:'Spacing',patternRotation:'Rotation',patternOffset:'Stagger',patternSeamless:'Seamless edges',exportPatternTile:'Pattern Tile',patternStatus:'Pattern mode: adjust the repeat, then drag the preview to move the light.',typeStatus:'Type source ready. Try it with Pattern for a repeating monogram.',fontLoaded:'Custom font loaded.',fontFailed:'This font could not be loaded.',
       panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',
-      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
+      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',reflectionScale:'Reflection size',reflectionTexture:'Reflection variation',reflectionRotation:'Reflection rotation',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
       exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
       help:'Help / 帮助',close:'Close',helpTitle:'Help / 帮助',
-      quickTitle:'Quick Start / 快速开始',quickText:'Upload a PNG, JPG, WebP, or SVG. Use Brightness for normal images, Alpha for transparent logos. 导入图片后选择亮度或透明度作为高度来源。',
+      quickTitle:'Quick Start / 快速开始',quickText:'Upload an image or create a Type / Monogram source directly. Use Brightness for normal images and Alpha for transparent artwork. 可上传图像，也可直接输入文字或字母组合。',
       reliefHelpTitle:'Relief / 浮雕',reliefHelpText:'Height controls depth, Edge softness smooths edges, Base cut removes faint background, Edge swell adds raised bevel. 调节高度、柔边、底部裁切和边缘膨胀。',
-      compHelpTitle:'Composition / 构图',compHelpText:'Single is for one centered image. Mosaic blends multiple panels into one relief board. Drag the preview to move light. Single 适合单图，Mosaic 适合多图拼版。',
-      matHelpTitle:'Material / 材质',matHelpText:'Choose a preset first, then fine tune color, grain, roughness, highlight, and surface texture. 先选预设，再微调颜色、颗粒和反光。',
+      compHelpTitle:'Composition / 构图',compHelpText:'Single centers one image, Pattern repeats it as a surface, and Mosaic blends multiple panels. Drag the preview to move light. 单图用于居中展示，Pattern 用于连续纹样，Mosaic 用于多图拼版。',
+      matHelpTitle:'Material / 材质',matHelpText:'Choose a preset first, then fine tune color, grain, roughness, and surface texture. Metal presets also reveal reflection size and variation controls. 先选预设，金属材质会额外显示反射尺寸和变化。',
       overlayHelpTitle:'Overlay / 叠加',overlayHelpText:'Overlay keeps a PNG/WebP/SVG above the relief. Drag it on canvas, use mouse wheel or Scale to resize, Clear returns to Blank. 叠加图可拖动、缩放和清空。',
       exportHelpTitle:'Export / 导出',exportHelpText:'PNG supports 1x, 2x, 4x, Custom long-edge export, Height Map, and Auto Subject transparent crop. Export Light Sweep records a short WebM light animation. PNG 支持 1x、2x、4x、自定义长边、灰度高度图，以及 Auto Subject 透明主体裁切导出。',
       licenseTitle:'Activate / 授权激活',licenseText:'Enter the purchase email and license code. 输入购买邮箱和授权码即可激活。',email:'Email / 邮箱',licenseCode:'License Code / 授权码',activate:'Activate',clearLicense:'Clear License',
-      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportingHeightMap:'Exporting Height Map...',exportingHeightMapHint:'Writing the current relief height as a black-to-white PNG.',exportingSubject:'Exporting Auto Subject...',exportingSubjectHint:'Cropping the active relief area into a transparent PNG.',exportDone:'PNG exported.',heightMapDone:'Height Map PNG exported.',subjectDone:'Auto Subject PNG exported.',exportFailed:'PNG export failed.',heightMapFailed:'Height Map export failed.',subjectFailed:'Auto Subject export failed.'
+      renderingSweep:'Rendering Sweep...',sweepDone:'Light sweep video exported.',exportingPng:'Exporting PNG...',exportingPngHint:'Large exports can take a moment.',exportingHeightMap:'Exporting Height Map...',exportingHeightMapHint:'Writing the current relief height as a black-to-white PNG.',exportingSubject:'Exporting Auto Subject...',exportingSubjectHint:'Cropping the active relief area into a transparent PNG.',exportingPatternTile:'Exporting Pattern Tile...',exportingPatternTileHint:'Rendering one repeat unit with the current surface and lighting.',exportDone:'PNG exported.',heightMapDone:'Height Map PNG exported.',subjectDone:'Auto Subject PNG exported.',patternTileDone:'Pattern Tile PNG exported.',exportFailed:'PNG export failed.',heightMapFailed:'Height Map export failed.',subjectFailed:'Auto Subject export failed.',patternTileFailed:'Pattern Tile export failed.'
     },
     zh:{
       finish:'成片效果',finishSaturation:'饱和度',finishContrast:'最终对比度',finishSharpness:'锐度',finishClarity:'清晰度',finishHighlight:'高光增强',finishBloom:'辉光',finishWarmth:'金色暖度',
       eyebrow:'浮雕表面工具',brand:'把标志、手绘稿或黑白图像转换成可调光的浮雕表面。',
-      image:'图像',upload:'上传图像',uploadHint:'透明 PNG 或灰度图效果最好。也可以直接拖入图片。',brightness:'亮度',alpha:'透明度',invert:'反转高度',
+      image:'输入',imageMode:'图像',typeMode:'文字 / 字母标',typeText:'文字 / 字母组合',typeFontImport:'导入字体',typeFontHint:'支持 TTF、OTF、WOFF、WOFF2',fontSans:'无衬线',fontSerif:'衬线',fontScript:'花体',fontHandwriting:'手写',tracking:'字距',lineSpacing:'行距',paragraphAlign:'段落对齐',alignLeft:'居左',alignCenter:'居中',alignRight:'居右',italic:'斜体',fontLight:'细体',fontRegular:'常规',fontMedium:'中等',fontBold:'粗体',fontBlack:'特粗',upload:'上传图像',uploadHint:'透明 PNG 或灰度图效果最好。也可以直接拖入图片。',brightness:'亮度',alpha:'透明度',invert:'反转高度',
       relief:'浮雕',height:'高度',soft:'边缘柔化',contrast:'对比度',threshold:'底部裁切',bevel:'边缘膨胀',
       lighting:'灯光',angle:'角度',lightHeight:'灯光高度',ambient:'环境光',shine:'高光',sweepDuration:'扫光时长',previewSweep:'预览扫光',stopSweep:'停止扫光',
-      composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'居中浮雕',single:'单图',mosaic:'拼版',shuffle:'随机网格',
+      composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'居中浮雕',single:'单图',pattern:'纹样',mosaic:'拼版',shuffle:'随机网格',
+      patternLayout:'重复方式',patternGrid:'网格',patternBrick:'砖式错排',patternHalfDrop:'半落式',patternMirror:'镜像',patternSize:'图案大小',patternGap:'图案间距',patternRotation:'图案旋转',patternOffset:'错位比例',patternSeamless:'无缝环绕',exportPatternTile:'纹样单元',patternStatus:'纹样模式：调整重复方式，在预览区拖动可移动灯光。',typeStatus:'文字高度源已生成，可以配合 Pattern 制作连续字母纹样。',fontLoaded:'自定义字体已载入。',fontFailed:'无法载入这个字体文件。',
       panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',
-      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
+      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',reflectionScale:'反射尺寸',reflectionTexture:'反射变化',reflectionRotation:'反射旋转',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
       exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
       help:'帮助',close:'关闭',helpTitle:'帮助',
-      quickTitle:'快速开始',quickText:'导入 PNG、JPG、WebP 或 SVG。普通图片建议用“亮度”，透明标志建议用“透明度”作为高度来源。',
+      quickTitle:'快速开始',quickText:'可以导入 PNG、JPG、WebP、SVG，也可以直接输入文字或字母组合。普通图片建议用“亮度”，透明标志建议用“透明度”。',
       reliefHelpTitle:'浮雕',reliefHelpText:'高度控制起伏深度，边缘柔化让轮廓更顺，底部裁切可以去掉浅色背景，边缘膨胀会增加凸起的倒角感。',
-      compHelpTitle:'构图',compHelpText:'单图适合居中展示一个图像；拼版会把多个面板融合成一张浮雕板。拖动预览区可以调整灯光方向。',
-      matHelpTitle:'材质',matHelpText:'先选择材质预设，再微调颜色、颗粒、粗糙度、高光和表面纹理。',
+      compHelpTitle:'构图',compHelpText:'单图适合居中展示；纹样会把一个图形重复成连续表面；拼版会融合多个面板。拖动预览区可以调整灯光方向。',
+      matHelpTitle:'材质',matHelpText:'先选择材质预设，再微调颜色、颗粒、粗糙度和表面纹理。选择金属材质后，还会显示反射尺寸与反射变化。',
       overlayHelpTitle:'叠加',overlayHelpText:'叠加图会显示在浮雕上方。可以在画布中拖动，用鼠标滚轮或缩放控件调整大小，清空后回到空白状态。',
       exportHelpTitle:'导出',exportHelpText:'PNG 支持 1x、2x、4x、自定义长边、灰度高度图，以及 Auto Subject 透明主体裁切导出；扫光视频会导出一段 WebM 灯光动画。',
       licenseTitle:'授权激活',licenseText:'请输入购买邮箱和授权码，激活后即可使用。',email:'邮箱',licenseCode:'授权码',activate:'激活',clearLicense:'清除授权',
-      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportingHeightMap:'正在导出灰度高度图...',exportingHeightMapHint:'将当前浮雕高度写成黑到白的 PNG。',exportingSubject:'正在导出 Auto Subject...',exportingSubjectHint:'正在根据有效浮雕区域裁切透明 PNG。',exportDone:'PNG 已导出。',heightMapDone:'灰度高度图 PNG 已导出。',subjectDone:'Auto Subject PNG 已导出。',exportFailed:'PNG 导出失败。',heightMapFailed:'灰度高度图导出失败。',subjectFailed:'Auto Subject 导出失败。'
+      renderingSweep:'正在渲染扫光...',sweepDone:'扫光视频已导出。',exportingPng:'正在导出 PNG...',exportingPngHint:'大尺寸导出需要一点时间。',exportingHeightMap:'正在导出灰度高度图...',exportingHeightMapHint:'将当前浮雕高度写成黑到白的 PNG。',exportingSubject:'正在导出 Auto Subject...',exportingSubjectHint:'正在根据有效浮雕区域裁切透明 PNG。',exportingPatternTile:'正在导出纹样单元...',exportingPatternTileHint:'正在使用当前材质和灯光渲染一个重复单元。',exportDone:'PNG 已导出。',heightMapDone:'灰度高度图 PNG 已导出。',subjectDone:'Auto Subject PNG 已导出。',patternTileDone:'纹样单元 PNG 已导出。',exportFailed:'PNG 导出失败。',heightMapFailed:'灰度高度图导出失败。',subjectFailed:'Auto Subject 导出失败。',patternTileFailed:'纹样单元导出失败。'
     }
   };
   function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
@@ -633,19 +758,26 @@ body.mosaic-mode .single-only{display:none}
     document.documentElement.lang=state.lang==='zh'?'zh-CN':'en';
     localStorage.setItem('embossLabLang',state.lang);
     setAll([
-      ['.brand .eyebrow','eyebrow'],['.brand p','brand'],['.scroll .group:nth-of-type(1) .title','image'],['#dropZone small','uploadHint'],
-      ['[data-source="luma"]','brightness'],['[data-source="alpha"]','alpha'],['.scroll .group:nth-of-type(1) .toggle span','invert'],
+      ['.brand .eyebrow','eyebrow'],['.brand p','brand'],['.scroll .group:nth-of-type(1) .title','image'],['[data-input-mode="image"]','imageMode'],['[data-input-mode="type"]','typeMode'],['#dropZone small','uploadHint'],['.type-copy > span','typeText'],['.font-upload small','typeFontHint'],['label[for="typeTracking"]','tracking'],['label[for="typeLineHeight"]','lineSpacing'],['#typeItalicLabel','italic'],
+      ['[data-source="luma"]','brightness'],['[data-source="alpha"]','alpha'],['#invertLabel','invert'],
       ['.scroll .group:nth-of-type(2) .title','relief'],['label[for="height"]','height'],['label[for="soft"]','soft'],['label[for="contrast"]','contrast'],['label[for="threshold"]','threshold'],['label[for="bevel"]','bevel'],
       ['.scroll .group:nth-of-type(3) .title','lighting'],['label[for="angle"]','angle'],['label[for="lightHeight"]','lightHeight'],['label[for="ambient"]','ambient'],['label[for="shine"]','shine'],['label[for="sweepDuration"]','sweepDuration'],
-      ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],
-      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
+      ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="pattern"]','pattern'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="patternSize"]','patternSize'],['label[for="patternGap"]','patternGap'],['label[for="patternRotation"]','patternRotation'],['label[for="patternOffset"]','patternOffset'],['.pattern-tools .toggle span','patternSeamless'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],
+      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="reflectionScale"]','reflectionScale'],['label[for="reflectionTexture"]','reflectionTexture'],['label[for="reflectionRotation"]','reflectionRotation'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
-      ['#export','exportPng'],['#exportHeightMap','exportHeightMap'],['#exportSubject','exportSubject'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
+      ['#export','exportPng'],['#exportHeightMap','exportHeightMap'],['#exportSubject','exportSubject'],['#exportPatternTile','exportPatternTile'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
       ['#licenseTitle','licenseTitle'],['#licenseModal .status','licenseText'],['#licenseEmailLabel','email'],['#licenseCodeLabel','licenseCode'],['#licenseActivate','activate'],['#licenseClear','clearLicense']
     ]);
     document.getElementById('langToggle').textContent='中文/EN';
-    if(!sourceAt(0).userLoaded)document.getElementById('fileName').textContent=tr('upload');
+    document.getElementById('patternLayout').setAttribute('aria-label',tr('patternLayout'));
+    document.getElementById('typeFont').setAttribute('aria-label',tr('typeMode'));
+    var alignGroup=document.querySelector('.type-align');if(alignGroup)alignGroup.setAttribute('aria-label',tr('paragraphAlign'));
+    [['left','alignLeft'],['center','alignCenter'],['right','alignRight']].forEach(function(item){var button=document.querySelector('[data-type-align="'+item[0]+'"]');if(button){button.setAttribute('aria-label',tr(item[1]));button.setAttribute('title',tr(item[1]))}});
+    var fontGroups=document.querySelectorAll('#typeFont optgroup');
+    [tr('fontSans'),tr('fontSerif'),tr('fontScript'),tr('fontHandwriting')].forEach(function(label,index){if(fontGroups[index])fontGroups[index].label=label});
+    if(!customTypeFace)document.getElementById('typeFontName').textContent=tr('typeFontImport');
+    if(state.inputMode==='image'&&!sourceAt(0).userLoaded)document.getElementById('fileName').textContent=tr('upload');
     if(!overlayReady)document.getElementById('overlayName').textContent=tr('overlayName');
     setText('.help-item:nth-child(1) h3',tr('quickTitle'));setText('.help-item:nth-child(1) p',tr('quickText'));
     setText('.help-item:nth-child(2) h3',tr('reliefHelpTitle'));setText('.help-item:nth-child(2) p',tr('reliefHelpText'));
@@ -655,10 +787,13 @@ body.mosaic-mode .single-only{display:none}
     setText('.help-item:nth-child(6) h3',tr('exportHelpTitle'));setText('.help-item:nth-child(6) p',tr('exportHelpText'));
     setText('label:has(#base) .title',tr('surface'));setText('label:has(#back) .title',tr('background'));
     setOption('#canvasRatio','free','sourceRatio');setOption('#canvasRatio','1','square');setOption('#canvasRatio','0.8','portrait45');setOption('#canvasRatio','0.75','portrait34');setOption('#canvasRatio','1.3333333','landscape43');setOption('#canvasRatio','1.7777778','wide169');
+    setOption('#patternLayout','grid','patternGrid');setOption('#patternLayout','brick','patternBrick');setOption('#patternLayout','halfDrop','patternHalfDrop');setOption('#patternLayout','mirror','patternMirror');
+    setOption('#typeWeight','300','fontLight');setOption('#typeWeight','400','fontRegular');setOption('#typeWeight','500','fontMedium');setOption('#typeWeight','700','fontBold');setOption('#typeWeight','900','fontBlack');
     setOption('#mosaicCount','3','panels3');setOption('#mosaicCount','4','panels4');
     setOption('#surfaceTexture','none','none');setOption('#surfaceTexture','clouds','clouds');setOption('#surfaceTexture','grainProc','fineGrain');setOption('#surfaceTexture','spots','spots');setOption('#surfaceTexture','cells','cells');
     document.querySelectorAll('.material').forEach(function(b){var key=b.dataset.material,m=materials[key];b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name)});
     updateValues();
+    if(state.composition==='pattern')setStatus(tr('patternStatus'));
   }
   function fitSize(w,h,max){var s=Math.min(max/w,max/h,1);return [Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s))]}
   function fitInside(w,h,maxW,maxH){var s=Math.min(maxW/w,maxH/h);return [Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s))]}
@@ -670,28 +805,175 @@ body.mosaic-mode .single-only{display:none}
   function readState(id){var el=document.getElementById(id);state[id]=el.type==='checkbox'?el.checked:(el.type==='range'?+el.value:el.value)}
   function sourceAt(index){
     if(panelSources[index]) return panelSources[index];
-    var canvas=document.createElement('canvas'), source={image:new Image(),canvas:canvas,ctx:canvas.getContext('2d',{willReadFrequently:true}),heightCache:null,blendMask:null,name:'Panel '+(index+1),panelScale:100,panelX:0,panelY:0,userLoaded:false};
+    var canvas=document.createElement('canvas'), source={image:new Image(),canvas:canvas,ctx:canvas.getContext('2d',{willReadFrequently:true}),heightCache:null,blendMask:null,name:'Panel '+(index+1),panelScale:100,panelX:0,panelY:0,userLoaded:false,generated:false};
     panelSources[index]=source;
     return source;
   }
-  function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null})}
+  function sourceReady(source){return !!(source&&source.canvas&&source.canvas.width&&(source.generated||(source.image&&source.image.naturalWidth)))}
+  function heightSourceFor(source){return source&&source.generated?'alpha':(state.inputMode==='type'?imageHeightSource:state.source)}
+  function clearPatternCache(){patternCache.key='';patternCache.metrics=null;patternCache.fields={};patternSource.heightCache=null;patternSource.blendMask=null}
+  function invalidatePatternHeight(){patternCache.revision++;clearPatternCache()}
+  function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null});invalidatePatternHeight()}
   function clearTextureCache(){textureCache.key='';textureCache.canvas=null}
   function updateValues(){
-    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
-      var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+(id==='angle'?' deg':(id==='sweepDuration'?' s':''));
+    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','patternSize','patternGap','patternRotation','patternOffset','typeTracking','typeLineHeight','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
+      var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+((id==='angle'||id==='reflectionRotation')?' deg':(id==='sweepDuration'?' s':(id==='typeLineHeight'?'%':'')));
     });
     document.getElementById('base').value=state.base;
     document.getElementById('back').value=state.back;
     document.getElementById('surfaceTexture').value=state.texture;
+    document.getElementById('canvasRatio').value=state.canvasRatio;
+    document.getElementById('patternLayout').value=state.patternLayout;
+    document.getElementById('patternSeamless').checked=state.patternSeamless;
+    document.getElementById('patternOffset').disabled=state.patternLayout==='grid'||state.patternLayout==='mirror';
+    document.getElementById('typeFont').value=state.typeFont;
+    document.getElementById('typeWeight').value=state.typeWeight;
+    document.getElementById('typeTracking').value=state.typeTracking;
+    document.getElementById('typeLineHeight').value=state.typeLineHeight;
+    document.getElementById('typeItalic').checked=state.typeItalic;
+    document.querySelectorAll('[data-type-align]').forEach(function(b){var active=b.dataset.typeAlign===state.typeAlign;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false')});
     document.getElementById('textureStrength').disabled=state.texture==='none';
     document.getElementById('textureScale').disabled=state.texture==='none';
+    document.getElementById('textureDetail').disabled=state.texture==='none';
     document.querySelectorAll('[data-source]').forEach(function(b){b.classList.toggle('active',b.dataset.source===state.source)});
+    document.querySelectorAll('[data-input-mode]').forEach(function(b){b.classList.toggle('active',b.dataset.inputMode===state.inputMode)});
     document.querySelectorAll('[data-composition]').forEach(function(b){b.classList.toggle('active',b.dataset.composition===state.composition)});
     document.querySelectorAll('[data-material]').forEach(function(b){b.classList.toggle('active',b.dataset.material===state.material)});
     document.querySelectorAll('[data-finish]').forEach(function(b){b.classList.toggle('active',b.dataset.finish===state.finish)});
     document.body.classList.toggle('mosaic-mode',state.composition==='mosaic');
+    document.body.classList.toggle('pattern-mode',state.composition==='pattern');
+    document.body.classList.toggle('type-mode',state.inputMode==='type');
+    document.body.classList.toggle('metal-mode',state.material==='silver'||state.material==='gold'||state.material==='chrome'||state.material==='toxic');
+    document.getElementById('exportSubject').disabled=state.composition!=='single';
     document.getElementById('sweep').classList.toggle('active',state.sweep);
     document.getElementById('sweep').textContent=state.sweep?tr('stopSweep'):tr('previewSweep');
+  }
+  function typeFontFamily(){
+    if(state.typeFont==='custom'&&customTypeFamily)return '"'+customTypeFamily+'"';
+    var families={
+      outfit:'Outfit, Arial, sans-serif',montserrat:'Montserrat, Arial, sans-serif',roboto:'Roboto, Arial, sans-serif',inter:'Inter, Arial, sans-serif',
+      ebGaramond:'"EB Garamond", Georgia, serif',playfair:'"Playfair Display", Georgia, serif',cormorant:'"Cormorant Garamond", Georgia, serif',instrument:'"Instrument Serif", Georgia, serif',
+      caveat:'Caveat, cursive',greatVibes:'"Great Vibes", cursive'
+    };
+    return families[state.typeFont]||families.instrument;
+  }
+  function typeFontCss(size){return (state.typeItalic?'italic ':'normal ')+state.typeWeight+' '+size+'px '+typeFontFamily()}
+  function typeGlyphs(text){
+    if(typeof Intl!=='undefined'&&Intl.Segmenter){
+      try{return Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text),function(part){return part.segment})}catch(error){}
+    }
+    return Array.from(text);
+  }
+  function measureTypeLineMetrics(ctx,text,tracking,fallback){
+    if(!text)return {advance:0,left:0,right:0,width:0,ascent:fallback.ascent,descent:fallback.descent};
+    if(Math.abs(tracking)<.01){
+      var whole=ctx.measureText(text), wholeLeft=-(isFinite(whole.actualBoundingBoxLeft)?whole.actualBoundingBoxLeft:0), wholeRight=isFinite(whole.actualBoundingBoxRight)&&whole.actualBoundingBoxRight?whole.actualBoundingBoxRight:whole.width;
+      return {advance:whole.width,left:wholeLeft,right:wholeRight,width:Math.max(0,wholeRight-wholeLeft),ascent:whole.actualBoundingBoxAscent||fallback.ascent,descent:whole.actualBoundingBoxDescent||fallback.descent};
+    }
+    var glyphs=typeGlyphs(text), x=0, minX=Infinity, maxX=-Infinity, ascent=0, descent=0;
+    for(var i=0;i<glyphs.length;i++){
+      var metric=ctx.measureText(glyphs[i]), left=x-(isFinite(metric.actualBoundingBoxLeft)?metric.actualBoundingBoxLeft:0), right=x+(isFinite(metric.actualBoundingBoxRight)&&metric.actualBoundingBoxRight?metric.actualBoundingBoxRight:metric.width);
+      minX=Math.min(minX,left);maxX=Math.max(maxX,right);ascent=Math.max(ascent,metric.actualBoundingBoxAscent||0);descent=Math.max(descent,metric.actualBoundingBoxDescent||0);
+      x+=metric.width+(i<glyphs.length-1?tracking:0);
+    }
+    if(!isFinite(minX)){minX=0;maxX=0}
+    return {advance:Math.max(0,x),left:minX,right:maxX,width:Math.max(0,maxX-minX),ascent:ascent||fallback.ascent,descent:descent||fallback.descent};
+  }
+  function drawTypeLine(ctx,text,anchorX,baseline,tracking,metrics,metricScale,align){
+    if(!text)return;
+    var x=align==='left'?anchorX-metrics.left*metricScale:(align==='right'?anchorX-metrics.right*metricScale:anchorX-(metrics.left+metrics.right)*metricScale/2);
+    ctx.textAlign='left';
+    if(Math.abs(tracking)<.01){ctx.fillText(text,x,baseline);return}
+    var glyphs=typeGlyphs(text);
+    for(var i=0;i<glyphs.length;i++){
+      ctx.fillText(glyphs[i],x,baseline);
+      x+=ctx.measureText(glyphs[i]).width+(i<glyphs.length-1?tracking:0);
+    }
+  }
+  function updateTypeThumbnail(){
+    var source=sourceAt(0), out=document.createElement('canvas'), ctx=out.getContext('2d');
+    out.width=240;out.height=160;
+    var fit=fitInside(source.canvas.width,source.canvas.height,220,140), x=(out.width-fit[0])/2, y=(out.height-fit[1])/2;
+    ctx.drawImage(source.canvas,x,y,fit[0],fit[1]);
+    var url=out.toDataURL('image/png');thumb.src=url;document.getElementById('panelThumb0').src=url;
+  }
+  function renderTypeSource(interactive){
+    if(state.inputMode!=='type')return;
+    var source=sourceAt(0), text=(state.typeText||'').replace(/\r/g,''), lines=text.split('\n');
+    var baseSize=1440, baseTracking=state.typeTracking*2, measure=document.createElement('canvas').getContext('2d');
+    measure.font=typeFontCss(baseSize);measure.textBaseline='alphabetic';
+    var sample=measure.measureText('Hgjy'), fallback={ascent:sample.actualBoundingBoxAscent||baseSize*.78,descent:sample.actualBoundingBoxDescent||baseSize*.24};
+    var metrics=[], lineAdvance=baseSize*state.typeLineHeight/100, padding=baseSize*.12, maxWidth=0, minTop=Infinity, maxBottom=-Infinity;
+    for(var i=0;i<lines.length;i++){
+      var lineMetric=measureTypeLineMetrics(measure,lines[i],baseTracking,fallback);
+      var metricBaseline=i*lineAdvance;
+      metrics.push(lineMetric);maxWidth=Math.max(maxWidth,lineMetric.width);minTop=Math.min(minTop,metricBaseline-lineMetric.ascent);maxBottom=Math.max(maxBottom,metricBaseline+lineMetric.descent);
+    }
+    var contentHeight=Math.max(0,maxBottom-minTop);
+    var empty=!text.replace(/\s/g,'');
+    var rawWidth=empty?900:Math.max(180,maxWidth+padding*2);
+    var rawHeight=empty?900:Math.max(180,padding*2+contentHeight), maxEdge=interactive?1050:2400;
+    var scale=Math.min(maxEdge/rawWidth,maxEdge/rawHeight,1), width=Math.max(64,Math.ceil(rawWidth*scale)), height=Math.max(64,Math.ceil(rawHeight*scale));
+    source.canvas.width=width;source.canvas.height=height;source.ctx=source.canvas.getContext('2d',{willReadFrequently:true});
+    source.ctx.clearRect(0,0,width,height);
+    if(!empty){
+      source.ctx.fillStyle='#fff';source.ctx.font=typeFontCss(baseSize*scale);source.ctx.textBaseline='alphabetic';
+      var baseline=(padding-minTop)*scale, textAnchor=state.typeAlign==='left'?padding*scale:(state.typeAlign==='right'?width-padding*scale:width/2);
+      for(var line=0;line<lines.length;line++){
+        drawTypeLine(source.ctx,lines[line],textAnchor,baseline+line*lineAdvance*scale,baseTracking*scale,metrics[line],scale,state.typeAlign);
+      }
+    }
+    var label=text.replace(/\s+/g,' ').trim()||tr('typeMode');
+    source.name='Type · '+label;source.userLoaded=true;source.generated=true;
+    source.heightCache=null;source.blendMask=null;heightCache=null;invalidatePatternHeight();
+    document.getElementById('panelName0').textContent=label.length>12?label.slice(0,11)+'…':label;
+    updateTypeThumbnail();schedule(!!interactive);
+  }
+  function requestTypeRender(interactive){
+    var revision=++typeRenderRevision;
+    clearTimeout(typeRefineTimer);
+    renderTypeSource(interactive);
+    var earliest=Date.now()+(interactive?220:0);
+    function refine(){
+      if(revision!==typeRenderRevision||state.inputMode!=='type')return;
+      var wait=Math.max(0,earliest-Date.now());
+      clearTimeout(typeRefineTimer);
+      typeRefineTimer=setTimeout(function(){if(revision===typeRenderRevision&&state.inputMode==='type')renderTypeSource(false)},wait);
+    }
+    if(interactive)refine();
+    if(document.fonts&&document.fonts.load){
+      document.fonts.load(typeFontCss(96),state.typeText||'A').then(function(){
+        refine();
+      }).catch(function(){});
+    }
+  }
+  function setInputMode(mode){
+    var source=sourceAt(0);
+    if(mode==='type'){
+      if(state.inputMode==='image')imageHeightSource=state.source;
+      state.inputMode='type';state.source='alpha';updateValues();requestTypeRender(false);setStatus(tr('typeStatus'));
+      return;
+    }
+    state.inputMode='image';state.source=imageHeightSource;source.userLoaded=imageUserLoaded;source.generated=false;source.name=loadedName;
+    document.getElementById('fileName').textContent=imageUserLoaded?shortName(loadedName):tr('upload');
+    document.getElementById('panelName0').textContent=shortName(loadedName);
+    if(image.src){thumb.src=image.src;document.getElementById('panelThumb0').src=image.src}
+    updateValues();rebuildSource(source);setStatus(tr('status'));
+  }
+  async function importTypeFont(file){
+    if(!file)return;
+    try{
+      if(typeof FontFace==='undefined')throw new Error('FontFace API unavailable');
+      var family='EmbossUserFont'+Date.now(), buffer=await file.arrayBuffer(), face=new FontFace(family,buffer);
+      await face.load();
+      if(customTypeFace&&document.fonts&&document.fonts.delete)document.fonts.delete(customTypeFace);
+      document.fonts.add(face);customTypeFace=face;customTypeFamily=family;
+      var option=document.getElementById('typeFontCustom');option.hidden=false;option.textContent=file.name;
+      document.getElementById('typeFontName').textContent=file.name;
+      state.typeFont='custom';setInputMode('type');setStatus(tr('fontLoaded')+' '+file.name);
+    }catch(error){
+      console.error(error);document.getElementById('typeFontFile').value='';setStatus(tr('fontFailed'));
+    }
   }
   function rebuildSource(source){
     source=source||sourceAt(0);
@@ -700,9 +982,10 @@ body.mosaic-mode .single-only{display:none}
     source.canvas.width=s[0]; source.canvas.height=s[1];
     source.ctx.clearRect(0,0,s[0],s[1]);
     source.ctx.drawImage(source.image,0,0,s[0],s[1]);
+    source.generated=false;
     source.heightCache=null;
     source.blendMask=null;
-    if(source===sourceAt(0)) heightCache=null;
+    if(source===sourceAt(0)){heightCache=null;invalidatePatternHeight()}
     schedule();
   }
   function sampleHeight(source){
@@ -711,28 +994,30 @@ body.mosaic-mode .single-only{display:none}
     var raw=source.ctx.getImageData(0,0,source.canvas.width,source.canvas.height);
     var data=raw.data, len=source.canvas.width*source.canvas.height, h=new Float32Array(len);
     source.blendMask=sourceBlendMask(data,source.canvas.width,source.canvas.height);
-    var c=state.contrast/100, cut=state.threshold/100;
+    var c=state.contrast/100, cut=state.threshold/100, heightSource=heightSourceFor(source);
     for(var i=0;i<len;i++){
       var p=i*4, a=data[p+3]/255, l=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
-      var v=state.source==='alpha'?a:l;
-      if(state.source==='luma' && a<.02) v=0;
+      var v=heightSource==='alpha'?a:l;
+      if(heightSource==='luma' && a<.02) v=0;
       if(state.invert) v=1-v;
       v=clamp((v-.5)*c+.5,0,1);
       v=clamp((v-cut)/(1-cut||1),0,1);
       h[i]=v;
     }
     var passes=Math.max(0,Math.round(state.soft/4));
-    for(var pass=0;pass<passes;pass++){
-      var next=new Float32Array(len), w=source.canvas.width, hh=source.canvas.height;
-      for(var y=0;y<hh;y++) for(var x=0;x<w;x++){
-        var sum=0, count=0;
-        for(var oy=-1;oy<=1;oy++) for(var ox=-1;ox<=1;ox++){
-          var xx=clamp(x+ox,0,w-1), yy=clamp(y+oy,0,hh-1);
-          sum+=h[yy*w+xx]; count++;
+    if(passes){
+      var w=source.canvas.width, hh=source.canvas.height, temp=new Float32Array(len), next=new Float32Array(len);
+      for(var pass=0;pass<passes;pass++){
+        for(var y=0;y<hh;y++){
+          var row=y*w;
+          for(var x=0;x<w;x++) temp[row+x]=(h[row+Math.max(0,x-1)]+h[row+x]+h[row+Math.min(w-1,x+1)])/3;
         }
-        next[y*w+x]=sum/count;
+        for(var y2=0;y2<hh;y2++){
+          var up=Math.max(0,y2-1)*w, mid=y2*w, down=Math.min(hh-1,y2+1)*w;
+          for(var x2=0;x2<w;x2++) next[mid+x2]=(temp[up+x2]+temp[mid+x2]+temp[down+x2])/3;
+        }
+        h=next;
       }
-      h=next;
     }
     if(state.bevel){
       var b=state.bevel/100;
@@ -760,76 +1045,98 @@ body.mosaic-mode .single-only{display:none}
     return mask;
   }
   function resizePreview(){
-    var r=stage.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2);
+    var r=stage.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,1.5);
     preview.width=Math.max(2,Math.round(r.width*dpr));
     preview.height=Math.max(2,Math.round(r.height*dpr));
     clearTextureCache();
-    schedule();
+    schedule(true);
   }
   function ratioValue(){
     if(state.composition==='mosaic'&&state.canvasRatio==='free') return 4/3;
+    if(state.composition==='pattern'&&state.canvasRatio==='free') return 1;
     if(state.canvasRatio!=='free') return +state.canvasRatio;
+    if(state.inputMode==='type'&&srcCanvas.width&&srcCanvas.height)return srcCanvas.width/srcCanvas.height;
     return image.naturalWidth&&image.naturalHeight?image.naturalWidth/image.naturalHeight:1;
   }
   function artboardRect(target){
-    var previewPad=state.composition==='mosaic'?.13:.05;
+    var previewPad=state.composition==='mosaic'?.13:(state.composition==='pattern'?.08:.05);
     var ratio=ratioValue(), pad=target===preview?Math.max(20,Math.min(target.width,target.height)*previewPad):0;
     var maxW=target.width-pad*2, maxH=target.height-pad*2, w=maxW, h=w/ratio;
     if(h>maxH){h=maxH;w=h*ratio}
     return {x:Math.round((target.width-w)/2),y:Math.round((target.height-h)/2),w:Math.round(w),h:Math.round(h)};
   }
   function drawRelief(source, ctx, frame, scale, mode){
-    if(!source||!source.image.naturalWidth||!source.canvas.width) return null;
+    if(!sourceReady(source)) return null;
     var max=Math.min(1600*scale,Math.max(frame.w,frame.h));
     var fit=fitInside(source.canvas.width,source.canvas.height,Math.min(frame.w,max)*.78,Math.min(frame.h,max)*.78);
     var reliefScale=mode&&mode.panel?source.panelScale:state.reliefScale;
     var offsetX=mode&&mode.panel?source.panelX:state.reliefX;
     var offsetY=mode&&mode.panel?source.panelY:state.reliefY;
-    var w=Math.max(2,Math.round(fit[0]*reliefScale/100)), h=Math.max(2,Math.round(fit[1]*reliefScale/100));
+    var w=mode&&mode.fill?Math.max(2,Math.round(frame.w)):Math.max(2,Math.round(fit[0]*reliefScale/100));
+    var h=mode&&mode.fill?Math.max(2,Math.round(frame.h)):Math.max(2,Math.round(fit[1]*reliefScale/100));
+    if(mode&&mode.contain){
+      var containScale=Math.min(1,frame.w/w,frame.h/h);
+      w=Math.max(2,Math.min(Math.round(frame.w),Math.round(w*containScale)));
+      h=Math.max(2,Math.min(Math.round(frame.h),Math.round(h*containScale)));
+    }
     var dx=mode&&mode.offset?frame.w*offsetX/100:(mode&&mode.panel?frame.w*offsetX/100:0);
     var dy=mode&&mode.offset?frame.h*offsetY/100:(mode&&mode.panel?frame.h*offsetY/100:0);
-    var x=Math.round(frame.x+(frame.w-w)/2+dx), y=Math.round(frame.y+(frame.h-h)/2+dy);
-    var off=document.createElement('canvas'); off.width=w; off.height=h;
+    var x=mode&&mode.fill?Math.round(frame.x):Math.round(frame.x+(frame.w-w)/2+dx);
+    var y=mode&&mode.fill?Math.round(frame.y):Math.round(frame.y+(frame.h-h)/2+dy);
+    if(mode&&mode.contain){
+      x=clamp(x,Math.round(frame.x),Math.round(frame.x+frame.w-w));
+      y=clamp(y,Math.round(frame.y),Math.round(frame.y+frame.h-h));
+    }
+    var renderScale=mode&&mode.renderCap?Math.min(1,mode.renderCap/Math.max(w,h)):1;
+    var renderW=Math.max(2,Math.round(w*renderScale)), renderH=Math.max(2,Math.round(h*renderScale));
+    var off=document.createElement('canvas'); off.width=renderW; off.height=renderH;
     var octx=off.getContext('2d',{willReadFrequently:true});
-    octx.drawImage(source.canvas,0,0,w,h);
     var heights=sampleHeight(source), mask=source.blendMask, hw=source.canvas.width, hh=source.canvas.height;
-    var img=octx.createImageData(w,h), pix=img.data;
+    var img=octx.createImageData(renderW,renderH), pix=img.data;
     var base=hex(state.base), bg=hex(state.back), surface=surfaceColor();
     var angle=state.angle*Math.PI/180, z=.12+state.lightHeight/46;
     var lx=Math.cos(angle), ly=Math.sin(angle), inv=1/Math.sqrt(lx*lx+ly*ly+z*z); lx*=inv; ly*=inv; var lz=z*inv;
     var strength=.8+state.height/10, ambient=state.ambient/100, rough=state.rough/100, specPower=mix(12,90,1-rough);
     var toxicMetal=state.material==='toxic';
     var reflectiveMetal=state.material==='silver'||state.material==='gold'||state.material==='chrome'||toxicMetal;
-    for(var py=0;py<h;py++) for(var px=0;px<w;px++){
-      var sx=Math.round(px/(w-1)*(hw-1)), sy=Math.round(py/(h-1)*(hh-1)), idx=sy*hw+sx;
-      var left=heights[sy*hw+Math.max(0,sx-1)], right=heights[sy*hw+Math.min(hw-1,sx+1)];
-      var up=heights[Math.max(0,sy-1)*hw+sx], down=heights[Math.min(hh-1,sy+1)*hw+sx];
-      var nx=(left-right)*strength, ny=(up-down)*strength, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
+    var reflectionSize=state.reflectionScale/100, reflectionVariation=state.reflectionTexture/100, reflectionFrequency=mix(10.5,1.25,reflectionSize);
+    var reflectionAngle=state.reflectionRotation*Math.PI/180, reflectionCos=Math.cos(reflectionAngle), reflectionSin=Math.sin(reflectionAngle);
+    for(var py=0;py<renderH;py++){
+      var sourceY=py/(renderH-1)*(hh-1), y0=Math.floor(sourceY), y1=Math.min(hh-1,y0+1), ty=sourceY-y0;
+      for(var px=0;px<renderW;px++){
+      var sourceX=px/(renderW-1)*(hw-1), x0=Math.floor(sourceX), x1=Math.min(hw-1,x0+1), tx=sourceX-x0;
+      var i00=y0*hw+x0, i10=y0*hw+x1, i01=y1*hw+x0, i11=y1*hw+x1;
+      var h00=heights[i00], h10=heights[i10], h01=heights[i01], h11=heights[i11];
+      var topHeight=mix(h00,h10,tx), bottomHeight=mix(h01,h11,tx), relief=mix(topHeight,bottomHeight,ty);
+      var gradientX=mix(h10-h00,h11-h01,ty), gradientY=mix(h01-h00,h11-h10,tx);
+      var nx=-gradientX*strength*2, ny=-gradientY*strength*2, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
       var diff=Math.max(0,nx*lx+ny*ly+nz*lz);
-      var edge=Math.min(1,Math.abs(right-left)*strength+Math.abs(down-up)*strength);
+      var edge=Math.min(1,(Math.abs(gradientX)+Math.abs(gradientY))*strength*2);
       var spec=Math.pow(Math.max(0,diff),specPower)*(state.shine/100)*(0.45+edge*.75);
       var shade=ambient+diff*(1-ambient), grain=(noise(px*.17,py*.17)-.5)*(state.grain/100)*34;
-      var relief=heights[idx], shadow=(1-diff)*edge*48*(state.height/100);
+      var shadow=(1-diff)*edge*48*(state.height/100);
       var metalReflect=0, metalEdge=0, brushed=0, toxicFlow=0, toxicRim=0, toxicPit=0, chromeCurve=0;
       if(reflectiveMetal){
-        var ux=px/Math.max(1,w), uy=py/Math.max(1,h);
-        var bandA=(Math.sin((uy*5.6+nx*1.9+state.angle*.009)*Math.PI*2)+1)*.5;
-        var bandB=(Math.sin((ux*2.1-uy*1.25+ny*2.3)*Math.PI*2)+1)*.5;
+        var ux=px/Math.max(1,renderW), uy=py/Math.max(1,renderH);
+        var centeredUx=ux-.5, centeredUy=uy-.5, reflectUx=centeredUx*reflectionCos-centeredUy*reflectionSin+.5, reflectUy=centeredUx*reflectionSin+centeredUy*reflectionCos+.5;
+        var centeredPx=px-renderW*.5, centeredPy=py-renderH*.5, reflectPx=centeredPx*reflectionCos-centeredPy*reflectionSin, reflectPy=centeredPx*reflectionSin+centeredPy*reflectionCos;
+        var normalWarp=mix(.75,2.5,reflectionVariation), bandA=(Math.sin((reflectUy*reflectionFrequency+nx*normalWarp+state.angle*.009)*Math.PI*2)+1)*.5;
+        var bandB=(Math.sin((reflectUx*reflectionFrequency*.46-reflectUy*reflectionFrequency*.27+ny*mix(.8,2.8,reflectionVariation))*Math.PI*2)+1)*.5;
         metalEdge=smoothstep(.08,.95,edge+Math.abs(nx)*.62+Math.abs(ny)*.62);
-        brushed=(noise(px*.055,py*.95)-.5)*mix(22,4,rough);
-        metalReflect=clamp(bandA*.52+bandB*.24+metalEdge*.42+spec*.55,0,1)*(1-rough*.55);
+        brushed=(noise(reflectPx*.055*mix(.65,1.7,reflectionVariation),reflectPy*.95*mix(.55,1.25,reflectionVariation))-.5)*mix(22,4,rough)*mix(.35,1,reflectionVariation);
+        metalReflect=clamp(bandA*mix(.7,.44,reflectionVariation)+bandB*mix(.08,.3,reflectionVariation)+metalEdge*.42+spec*.55,0,1)*(1-rough*.55);
         if(toxicMetal){
-          var curveA=(Math.sin((uy*7.8+Math.sin(ux*4.5+ny*2.2)*.85+nx*2.8+relief*1.9)*Math.PI*2)+1)*.5;
-          var curveB=(Math.sin((ux*4.2+Math.cos(uy*5.1+nx*2.6)*.75-ny*3.2)*Math.PI*2)+1)*.5;
-          toxicFlow=fbm(ux*4.2+ny*1.8+relief*.7,uy*5.6-nx*1.6,4);
-          toxicPit=smoothstep(.55,.95,fbm(ux*9.2+relief*1.1,uy*6.8+nx*1.5,3))*(1-metalEdge*.62);
+          var flowScale=mix(2.2,6.4,reflectionVariation), curveA=(Math.sin((reflectUy*reflectionFrequency*1.38+Math.sin(reflectUx*reflectionFrequency*.8+ny*2.2)*.85+nx*2.8+relief*1.9)*Math.PI*2)+1)*.5;
+          var curveB=(Math.sin((reflectUx*reflectionFrequency*.76+Math.cos(reflectUy*reflectionFrequency*.92+nx*2.6)*.75-ny*3.2)*Math.PI*2)+1)*.5;
+          toxicFlow=fbm(reflectUx*flowScale+ny*1.8+relief*.7,reflectUy*flowScale*1.22-nx*1.6,4);
+          toxicPit=smoothstep(.55,.95,fbm(reflectUx*flowScale*1.85+relief*1.1,reflectUy*flowScale*1.35+nx*1.5,3))*(1-metalEdge*.62);
           toxicRim=smoothstep(.05,.82,edge+Math.abs(nx)*1.05+Math.abs(ny)*.88);
           chromeCurve=clamp(curveA*.48+curveB*.34+toxicFlow*.22,0,1);
           metalReflect=clamp(metalReflect*.42+chromeCurve*.58+toxicRim*.34,0,1);
-          brushed=(noise(px*.045,py*.38)-.5)*mix(9,2,rough);
+          brushed=(noise(reflectPx*.045,reflectPy*.38)-.5)*mix(9,2,rough);
         }
       }
-      var p=(py*w+px)*4;
+      var p=(py*renderW+px)*4;
       for(var k=0;k<3;k++){
         var mat=mode&&mode.surfaceBlend?mix(surface[k],base[k],relief*.42):mix(bg[k],base[k],.6+relief*.4);
         var highlight=state.material==='gold'?[186,128,42][k]:state.material==='chrome'?230:toxicMetal?[198,230,192][k]:138;
@@ -850,9 +1157,9 @@ body.mosaic-mode .single-only{display:none}
         }
         pix[p+k]=clamp(value,0,255);
       }
-      var blend=mask&&state.source==='luma'?mask[idx]:1;
+      var blend=mask&&heightSourceFor(source)==='luma'?mix(mix(mask[i00],mask[i10],tx),mix(mask[i01],mask[i11],tx),ty):1;
       pix[p+3]=mode&&mode.surfaceBlend?clamp((relief*1.18+edge*.9)*blend*255,0,255):255;
-    }
+    }}
     octx.putImageData(img,0,0);
     if(mode&&mode.clip){
       ctx.save();
@@ -860,7 +1167,8 @@ body.mosaic-mode .single-only{display:none}
       ctx.rect(frame.x,frame.y,frame.w,frame.h);
       ctx.clip();
     }
-    ctx.drawImage(off,x,y);
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(off,x,y,w,h);
     if(mode&&mode.clip) ctx.restore();
     return {x:x,y:y,w:w,h:h};
   }
@@ -872,11 +1180,20 @@ body.mosaic-mode .single-only{display:none}
     }
     ctx.globalAlpha=1;
   }
-  function applyFinish(ctx,target){
+  function applyFinish(ctx,target,renderCap){
     var sat=state.finishSaturation/100, con=state.finishContrast/100;
     var sharp=state.finishSharpness/100, clarity=state.finishClarity/100, hi=state.finishHighlight/100, bloom=state.finishBloom/100, warm=state.finishWarmth/100;
     if(Math.abs(sat-1)<.01&&Math.abs(con-1)<.01&&!sharp&&!clarity&&!hi&&!bloom&&Math.abs(warm)<.01) return;
-    var w=target.width,h=target.height,img=ctx.getImageData(0,0,w,h),d=img.data, blurData=null;
+    var w=target.width,h=target.height;
+    if(renderCap&&Math.max(w,h)>renderCap){
+      var scale=renderCap/Math.max(w,h), reduced=document.createElement('canvas'), reducedCtx=reduced.getContext('2d');
+      reduced.width=Math.max(2,Math.round(w*scale));reduced.height=Math.max(2,Math.round(h*scale));
+      reducedCtx.drawImage(target,0,0,reduced.width,reduced.height);
+      applyFinish(reducedCtx,reduced);
+      ctx.clearRect(0,0,w,h);ctx.imageSmoothingEnabled=true;ctx.drawImage(reduced,0,0,w,h);
+      return;
+    }
+    var img=ctx.getImageData(0,0,w,h),d=img.data, blurData=null;
     if(sharp||clarity){
       var base=document.createElement('canvas'), bctx=base.getContext('2d');
       base.width=w;base.height=h;bctx.putImageData(img,0,0);
@@ -1043,10 +1360,11 @@ body.mosaic-mode .single-only{display:none}
     h=clamp(h,-1,1);
     return state.invert?-h:h;
   }
-  function drawMosaicSeams(ctx,board,scale){
+  function drawMosaicSeams(ctx,board,scale,renderCap){
     if(!mosaicSeams.length) return;
     var base=hex(state.base), bg=hex(state.back);
-    var out=document.createElement('canvas'), w=Math.max(2,Math.round(board.w)), h=Math.max(2,Math.round(board.h));
+    var renderScale=renderCap?Math.min(1,renderCap/Math.max(board.w,board.h)):1;
+    var out=document.createElement('canvas'), w=Math.max(2,Math.round(board.w*renderScale)), h=Math.max(2,Math.round(board.h*renderScale));
     out.width=w; out.height=h;
     var octx=out.getContext('2d'), img=octx.createImageData(w,h), pix=img.data;
     var lightAngle=state.angle*Math.PI/180, z=.12+state.lightHeight/46;
@@ -1055,10 +1373,10 @@ body.mosaic-mode .single-only{display:none}
     var width=Math.max(.55*scale,Math.min(board.w,board.h)*(.0006+.0014*height));
     var strength=7+height*36, specPower=mix(10,70,1-rough), alphaBase=.32+height*.46;
     for(var y=0;y<h;y++) for(var x=0;x<w;x++){
-      var center=mosaicSeamHeight(x,y,board,width);
+      var sampleX=x/renderScale, sampleY=y/renderScale, center=mosaicSeamHeight(sampleX,sampleY,board,width);
       if(Math.abs(center)<.012) continue;
-      var left=mosaicSeamHeight(x-1,y,board,width), right=mosaicSeamHeight(x+1,y,board,width);
-      var up=mosaicSeamHeight(x,y-1,board,width), down=mosaicSeamHeight(x,y+1,board,width);
+      var left=mosaicSeamHeight(sampleX-1,sampleY,board,width), right=mosaicSeamHeight(sampleX+1,sampleY,board,width);
+      var up=mosaicSeamHeight(sampleX,sampleY-1,board,width), down=mosaicSeamHeight(sampleX,sampleY+1,board,width);
       var nx=(left-right)*strength, ny=(up-down)*strength, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
       var diff=Math.max(0,nx*lx+ny*ly+nz*lz), neutral=Math.max(0,lz);
       var delta=(diff-neutral)*(1-ambient), valley=Math.max(0,-center)*(.16+height*.32);
@@ -1105,12 +1423,111 @@ body.mosaic-mode .single-only{display:none}
       };
       var source=sourceAt(index);
       if(target===preview) lastMosaicRects.push({index:index,x:rect.x,y:rect.y,w:rect.w,h:rect.h});
-      if(source.userLoaded) drawRelief(source,ctx,rect,scale,{panel:true,clip:true,surfaceBlend:true});
+      if(source.userLoaded) drawRelief(source,ctx,rect,scale,{panel:true,clip:true,surfaceBlend:true,renderCap:target===preview?520:0});
       else if(target===preview) drawPanelAdd(ctx,rect);
     });
   }
+  function patternMetrics(width,height){
+    var source=sourceAt(0), sw=Math.max(1,source.canvas.width), sh=Math.max(1,source.canvas.height), aspect=sw/sh;
+    var motifLong=Math.max(12,Math.min(width,height)*state.patternSize/100);
+    var motifW=aspect>=1?motifLong:motifLong*aspect, motifH=aspect>=1?motifLong/aspect:motifLong;
+    var spacing=Math.max(.18,1+state.patternGap/100), stepX=Math.max(4,motifW*spacing), stepY=Math.max(4,motifH*spacing);
+    var unitW=stepX, unitH=stepY;
+    if(state.patternLayout==='brick') unitH=stepY*2;
+    if(state.patternLayout==='halfDrop') unitW=stepX*2;
+    if(state.patternLayout==='mirror'){unitW=stepX*2;unitH=stepY*2}
+    return {motifW:motifW,motifH:motifH,stepX:stepX,stepY:stepY,unitW:Math.max(4,unitW),unitH:Math.max(4,unitH)};
+  }
+  function patternBases(metrics){
+    var sx=metrics.stepX, sy=metrics.stepY, offset=state.patternOffset/100;
+    if(state.patternLayout==='brick') return [
+      {x:sx*.5,y:sy*.5,mx:1,my:1},
+      {x:sx*(.5+offset),y:sy*1.5,mx:1,my:1}
+    ];
+    if(state.patternLayout==='halfDrop') return [
+      {x:sx*.5,y:sy*.5,mx:1,my:1},
+      {x:sx*1.5,y:sy*(.5+offset),mx:1,my:1}
+    ];
+    if(state.patternLayout==='mirror') return [
+      {x:sx*.5,y:sy*.5,mx:1,my:1},{x:sx*1.5,y:sy*.5,mx:-1,my:1},
+      {x:sx*.5,y:sy*1.5,mx:1,my:-1},{x:sx*1.5,y:sy*1.5,mx:-1,my:-1}
+    ];
+    return [{x:sx*.5,y:sy*.5,mx:1,my:1}];
+  }
+  function rasterizePatternMotif(target,width,height,sourceHeights,sourceW,sourceH,cx,cy,motifW,motifH,mirrorX,mirrorY,cos,sin,extentX,extentY,clip){
+    var minX=Math.max(0,Math.floor(cx-extentX-1)), maxX=Math.min(width-1,Math.ceil(cx+extentX+1));
+    var minY=Math.max(0,Math.floor(cy-extentY-1)), maxY=Math.min(height-1,Math.ceil(cy+extentY+1));
+    if(clip){
+      minX=Math.max(minX,Math.floor(clip.x));maxX=Math.min(maxX,Math.ceil(clip.x+clip.w)-1);
+      minY=Math.max(minY,Math.floor(clip.y));maxY=Math.min(maxY,Math.ceil(clip.y+clip.h)-1);
+    }
+    if(minX>maxX||minY>maxY)return;
+    var base=state.invert?1:0, depressed=state.invert, mx=mirrorX||1, my=mirrorY||1;
+    for(var y=minY;y<=maxY;y++) for(var x=minX;x<=maxX;x++){
+      var dx=x+.5-cx, dy=y+.5-cy;
+      var localX=(cos*dx+sin*dy)*mx, localY=(-sin*dx+cos*dy)*my;
+      var u=localX/motifW+.5, v=localY/motifH+.5;
+      if(u<0||u>1||v<0||v>1)continue;
+      var sx=clamp(u*sourceW-.5,0,sourceW-1), sy=clamp(v*sourceH-.5,0,sourceH-1), x0=Math.floor(sx), y0=Math.floor(sy);
+      var x1=Math.min(sourceW-1,x0+1), y1=Math.min(sourceH-1,y0+1), tx=sx-x0, ty=sy-y0;
+      var top=mix(sourceHeights[y0*sourceW+x0],sourceHeights[y0*sourceW+x1],tx);
+      var bottom=mix(sourceHeights[y1*sourceW+x0],sourceHeights[y1*sourceW+x1],tx);
+      var value=mix(top,bottom,ty);
+      var edgeDistance=Math.min(u*motifW,(1-u)*motifW,v*motifH,(1-v)*motifH);
+      if(edgeDistance<.5)value=mix(base,value,clamp(edgeDistance+.5,0,1));
+      var index=y*width+x;
+      target[index]=depressed?Math.min(target[index],value):Math.max(target[index],value);
+    }
+  }
+  function buildPatternHeight(width,height,metrics){
+    metrics=metrics||patternMetrics(width,height);
+    var source=sourceAt(0), sourceHeights=sampleHeight(source), sourceW=source.canvas.width, sourceH=source.canvas.height;
+    var tileWidth=Math.max(4,Math.ceil(metrics.unitW)), tileHeight=Math.max(4,Math.ceil(metrics.unitH));
+    var tile=new Float32Array(tileWidth*tileHeight), base=state.invert?1:0;
+    if(base)tile.fill(base);
+    var bases=patternBases(metrics), angle=state.patternRotation*Math.PI/180, cos=Math.cos(angle), sin=Math.sin(angle);
+    var extentX=Math.abs(cos)*metrics.motifW*.5+Math.abs(sin)*metrics.motifH*.5;
+    var extentY=Math.abs(sin)*metrics.motifW*.5+Math.abs(cos)*metrics.motifH*.5;
+    var wrapX=state.patternSeamless?Math.ceil(extentX/tileWidth)+1:0;
+    var wrapY=state.patternSeamless?Math.ceil(extentY/tileHeight)+1:0;
+    for(var b=0;b<bases.length;b++){
+      var baseMotif=bases[b];
+      for(var oy=-wrapY;oy<=wrapY;oy++) for(var ox=-wrapX;ox<=wrapX;ox++){
+        rasterizePatternMotif(tile,tileWidth,tileHeight,sourceHeights,sourceW,sourceH,baseMotif.x+ox*tileWidth,baseMotif.y+oy*tileHeight,metrics.motifW,metrics.motifH,baseMotif.mx,baseMotif.my,cos,sin,extentX,extentY,null);
+      }
+    }
+    var heights=new Float32Array(width*height);
+    for(var y=0;y<height;y++){
+      var targetRow=y*width, tileRow=(y%tileHeight)*tileWidth;
+      for(var x=0;x<width;x++) heights[targetRow+x]=tile[tileRow+x%tileWidth];
+    }
+    return heights;
+  }
+  function buildPatternSource(board,longEdge){
+    var ratio=Math.max(.05,board.w/Math.max(1,board.h));longEdge=longEdge||1200;
+    var width=ratio>=1?longEdge:Math.round(longEdge*ratio), height=ratio>=1?Math.round(longEdge/ratio):longEdge;
+    width=Math.max(16,width); height=Math.max(16,height);
+    var key=[patternCache.revision,width,height,state.patternLayout,state.patternSize,state.patternGap,state.patternRotation,state.patternOffset,state.patternSeamless?1:0].join('|');
+    var field=patternCache.fields[key];
+    if(!field){
+      var metrics=patternMetrics(width,height);
+      field={width:width,height:height,metrics:metrics,heights:buildPatternHeight(width,height,metrics)};
+      patternCache.fields[key]=field;
+    }
+    if(patternSource.canvas.width!==width||patternSource.canvas.height!==height){patternSource.canvas.width=width;patternSource.canvas.height=height}
+    patternSource.ctx=patternSource.canvas.getContext('2d',{willReadFrequently:true});
+    patternSource.heightCache=field.heights;patternSource.blendMask=null;
+    patternCache.key=key;patternCache.metrics=field.metrics;
+    return patternSource;
+  }
+  function drawPattern(ctx,target,board,scale){
+    panelSurface(ctx,board);
+    var previewCap=target===preview&&previewFast?560:0;
+    var sourceEdge=target===preview?(previewFast?560:clamp(Math.round(Math.max(board.w,board.h)),720,1400)):Math.min(2400,Math.max(1200,Math.round(Math.max(board.w,board.h))));
+    return drawRelief(buildPatternSource(board,sourceEdge),ctx,board,scale,{fill:true,surfaceBlend:true,renderCap:previewCap});
+  }
   function drawCanvas(target, scale, options){
-    if(!image.naturalWidth) return;
+    if(!sourceReady(sourceAt(0))) return;
     var ctx=target.getContext('2d'), board=artboardRect(target);
     options=options||{};
     ctx.fillStyle=state.back;
@@ -1121,16 +1538,19 @@ body.mosaic-mode .single-only{display:none}
     }
     if(state.composition==='mosaic'){
       drawMosaic(ctx,target,board,scale);
+    }else if(state.composition==='pattern'){
+      var relief=drawPattern(ctx,target,board,scale);
     }else{
       panelSurface(ctx,board);
-      var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,surfaceBlend:true});
+      var singleCap=target===preview?(state.inputMode==='type'?(previewFast?620:0):(previewFast?620:840)):0;
+      var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,contain:state.inputMode==='type',surfaceBlend:true,renderCap:singleCap});
       if(relief&&!options.skipOverlay) drawOverlay(ctx,target,relief.w,relief.h,relief.x,relief.y);
     }
-    if(state.composition==='mosaic'&&!options.skipOverlay) drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
+    if(state.composition!=='single'&&!options.skipOverlay) drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
     materialTexture(ctx,board);
-    if(state.composition==='mosaic') drawMosaicSeams(ctx,board,scale);
+    if(state.composition==='mosaic') drawMosaicSeams(ctx,board,scale,target===preview?720:0);
     grainCanvas(ctx,target);
-    applyFinish(ctx,target);
+    applyFinish(ctx,target,target===preview&&previewFast?720:0);
     if(target===preview) statsEl.textContent=board.w+' x '+board.h+' canvas';
     return {board:board,relief:relief};
   }
@@ -1148,29 +1568,43 @@ body.mosaic-mode .single-only{display:none}
     }
   }
   function render(){renderQueued=false;drawCanvas(preview,1);positionDot()}
-  function schedule(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(render)}
+  function schedule(interactive){
+    if(interactive){
+      previewFast=true;
+      clearTimeout(previewRefineTimer);
+      previewRefineTimer=setTimeout(function(){previewFast=false;schedule()},180);
+    }
+    if(renderQueued)return;
+    renderQueued=true;requestAnimationFrame(render);
+  }
   function positionDot(){
     var a=state.angle*Math.PI/180, r=stage.getBoundingClientRect();
     lightDot.style.left=(r.width*.5+Math.cos(a)*r.width*.34)+'px';
     lightDot.style.top=(r.height*.5+Math.sin(a)*r.height*.34)+'px';
   }
-  function loadData(url,name,userLoaded){
+  function loadData(url,name,userLoaded,preserveType){
     image.onload=function(){
+      var restoreType=!!preserveType&&state.inputMode==='type';
       loadedName=name;
+      imageUserLoaded=!!userLoaded;
+      if(!restoreType){state.inputMode='image';state.source=imageHeightSource}
       sourceAt(0).name=name;
       sourceAt(0).userLoaded=!!userLoaded;
+      sourceAt(0).generated=false;
       if(userLoaded){sourceAt(0).panelScale=100;sourceAt(0).panelX=0;sourceAt(0).panelY=0}
       document.getElementById('fileName').textContent=shortName(name);
       document.getElementById('panelName0').textContent=shortName(name);
       document.getElementById('panelThumb0').src=url;
       thumb.src=url;
+      updateValues();
       rebuildSource(sourceAt(0));
-      setStatus(state.composition==='mosaic'?(state.lang==='zh'?'拖动浮雕调整位置，滚轮缩放。':'Drag the relief to place it. Use the wheel to resize.'):tr('status'));
+      if(restoreType){setInputMode('type')}
+      else setStatus(state.composition==='mosaic'?(state.lang==='zh'?'拖动浮雕调整位置，滚轮缩放。':'Drag the relief to place it. Use the wheel to resize.'):tr('status'));
     };
     image.src=url;
   }
   function baseExportDimensions(){
-    var ratio=ratioValue(), sw=image.naturalWidth||srcCanvas.width||1024, sh=image.naturalHeight||srcCanvas.height||1024;
+    var ratio=ratioValue(), sw=state.inputMode==='type'?(srcCanvas.width||1024):(image.naturalWidth||srcCanvas.width||1024), sh=state.inputMode==='type'?(srcCanvas.height||1024):(image.naturalHeight||srcCanvas.height||1024);
     if(state.canvasRatio==='free'&&state.composition==='single') return [sw,sh];
     var longSide=Math.max(sw,sh);
     return ratio>=1?[longSide,Math.round(longSide/ratio)]:[Math.round(longSide*ratio),longSide];
@@ -1200,21 +1634,22 @@ body.mosaic-mode .single-only{display:none}
     setTimeout(function(){URL.revokeObjectURL(a.href)},2500);
   }
   function setExportBusy(active,size,mode){
-    var button=document.getElementById('export'), heightMap=document.getElementById('exportHeightMap'), subject=document.getElementById('exportSubject'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
-    var title=mode==='subject'?tr('exportingSubject'):(mode==='heightMap'?tr('exportingHeightMap'):tr('exportingPng'));
-    var hint=mode==='subject'?tr('exportingSubjectHint'):(mode==='heightMap'?tr('exportingHeightMapHint'):tr('exportingPngHint'));
+    var button=document.getElementById('export'), heightMap=document.getElementById('exportHeightMap'), subject=document.getElementById('exportSubject'), patternTile=document.getElementById('exportPatternTile'), sweep=document.getElementById('exportSweep'), overlay=document.getElementById('exportOverlay');
+    var title=mode==='patternTile'?tr('exportingPatternTile'):(mode==='subject'?tr('exportingSubject'):(mode==='heightMap'?tr('exportingHeightMap'):tr('exportingPng')));
+    var hint=mode==='patternTile'?tr('exportingPatternTileHint'):(mode==='subject'?tr('exportingSubjectHint'):(mode==='heightMap'?tr('exportingHeightMapHint'):tr('exportingPngHint')));
     if(active){
-      button.disabled=true; heightMap.disabled=true; subject.disabled=true; sweep.disabled=true;
-      (mode==='subject'?subject:(mode==='heightMap'?heightMap:button)).textContent=title;
+      button.disabled=true; heightMap.disabled=true; subject.disabled=true; patternTile.disabled=true; sweep.disabled=true;
+      (mode==='patternTile'?patternTile:(mode==='subject'?subject:(mode==='heightMap'?heightMap:button))).textContent=title;
       document.getElementById('exportOverlayTitle').textContent=title;
       document.getElementById('exportOverlayText').textContent=(size?size[0]+' x '+size[1]+'. ':'')+hint;
       overlay.classList.add('open');
       setStatus((size?size[0]+' x '+size[1]+' · ':'')+hint);
     }else{
-      button.disabled=false; heightMap.disabled=false; subject.disabled=false; sweep.disabled=false;
+      button.disabled=false; heightMap.disabled=false; subject.disabled=state.composition!=='single'; patternTile.disabled=false; sweep.disabled=false;
       button.textContent=tr('exportPng');
       heightMap.textContent=tr('exportHeightMap');
       subject.textContent=tr('exportSubject');
+      patternTile.textContent=tr('exportPatternTile');
       overlay.classList.remove('open');
     }
   }
@@ -1241,17 +1676,63 @@ body.mosaic-mode .single-only{display:none}
       setExportBusy(false);
     }
   }
+  function scalePatternMetrics(metrics,maxEdge){
+    var edge=Math.max(metrics.unitW,metrics.unitH), scale=edge>maxEdge?maxEdge/edge:1;
+    if(scale===1)return metrics;
+    return {motifW:metrics.motifW*scale,motifH:metrics.motifH*scale,stepX:metrics.stepX*scale,stepY:metrics.stepY*scale,unitW:metrics.unitW*scale,unitH:metrics.unitH*scale};
+  }
+  async function exportPatternTilePng(){
+    var size=exportDimensions();
+    if(state.composition!=='pattern'){setStatus(tr('patternStatus'));return}
+    var metrics=scalePatternMetrics(patternMetrics(size[0],size[1]),4096), tile=document.createElement('canvas');
+    tile.width=Math.max(4,Math.ceil(metrics.unitW));tile.height=Math.max(4,Math.ceil(metrics.unitH));
+    var tileSource={image:image,canvas:tile,ctx:tile.getContext('2d',{willReadFrequently:true}),heightCache:buildPatternHeight(tile.width,tile.height,metrics),blendMask:null,name:'pattern tile',generated:true};
+    var out=document.createElement('canvas'), board={x:0,y:0,w:tile.width,h:tile.height};
+    out.width=tile.width;out.height=tile.height;
+    setExportBusy(true,[out.width,out.height],'patternTile');
+    await nextFrame();
+    try{
+      var ctx=out.getContext('2d');
+      ctx.fillStyle=state.back;ctx.fillRect(0,0,out.width,out.height);
+      panelSurface(ctx,board);
+      drawRelief(tileSource,ctx,board,1,{fill:true,surfaceBlend:true});
+      materialTexture(ctx,board);grainCanvas(ctx,out);applyFinish(ctx,out);
+      await new Promise(function(resolve,reject){
+        out.toBlob(function(blob){
+          if(!blob){reject(new Error('PNG encoder returned an empty result'));return}
+          saveBlob(blob,'emboss-lab-pattern-'+state.patternLayout+'-'+out.width+'x'+out.height+'.png');
+          resolve();
+        },'image/png');
+      });
+      setStatus(tr('patternTileDone'));
+    }catch(error){
+      console.error(error);setStatus(tr('patternTileFailed'));
+    }finally{
+      clearTextureCache();setExportBusy(false);schedule();
+    }
+  }
   function drawHeightMapSource(source, ctx, frame, scale, mode){
-    if(!source||!source.image.naturalWidth||!source.canvas.width) return null;
+    if(!sourceReady(source)) return null;
     var max=Math.min(1600*scale,Math.max(frame.w,frame.h));
     var fit=fitInside(source.canvas.width,source.canvas.height,Math.min(frame.w,max)*.78,Math.min(frame.h,max)*.78);
     var reliefScale=mode&&mode.panel?source.panelScale:state.reliefScale;
     var offsetX=mode&&mode.panel?source.panelX:state.reliefX;
     var offsetY=mode&&mode.panel?source.panelY:state.reliefY;
-    var w=Math.max(2,Math.round(fit[0]*reliefScale/100)), h=Math.max(2,Math.round(fit[1]*reliefScale/100));
+    var w=mode&&mode.fill?Math.max(2,Math.round(frame.w)):Math.max(2,Math.round(fit[0]*reliefScale/100));
+    var h=mode&&mode.fill?Math.max(2,Math.round(frame.h)):Math.max(2,Math.round(fit[1]*reliefScale/100));
+    if(mode&&mode.contain){
+      var containScale=Math.min(1,frame.w/w,frame.h/h);
+      w=Math.max(2,Math.min(Math.round(frame.w),Math.round(w*containScale)));
+      h=Math.max(2,Math.min(Math.round(frame.h),Math.round(h*containScale)));
+    }
     var dx=mode&&mode.offset?frame.w*offsetX/100:(mode&&mode.panel?frame.w*offsetX/100:0);
     var dy=mode&&mode.offset?frame.h*offsetY/100:(mode&&mode.panel?frame.h*offsetY/100:0);
-    var x=Math.round(frame.x+(frame.w-w)/2+dx), y=Math.round(frame.y+(frame.h-h)/2+dy);
+    var x=mode&&mode.fill?Math.round(frame.x):Math.round(frame.x+(frame.w-w)/2+dx);
+    var y=mode&&mode.fill?Math.round(frame.y):Math.round(frame.y+(frame.h-h)/2+dy);
+    if(mode&&mode.contain){
+      x=clamp(x,Math.round(frame.x),Math.round(frame.x+frame.w-w));
+      y=clamp(y,Math.round(frame.y),Math.round(frame.y+frame.h-h));
+    }
     var heights=sampleHeight(source), hw=source.canvas.width, hh=source.canvas.height;
     var map=document.createElement('canvas'), mapCtx=map.getContext('2d');
     map.width=hw; map.height=hh;
@@ -1273,7 +1754,7 @@ body.mosaic-mode .single-only{display:none}
     return {x:x,y:y,w:w,h:h};
   }
   function drawHeightMapCanvas(target, scale){
-    if(!image.naturalWidth) return 0;
+    if(!sourceReady(sourceAt(0))) return 0;
     scale=scale||1;
     var ctx=target.getContext('2d'), board=artboardRect(target), drawn=0;
     ctx.fillStyle='#000';
@@ -1289,7 +1770,9 @@ body.mosaic-mode .single-only{display:none}
         };
         if(sourceAt(index).userLoaded&&drawHeightMapSource(sourceAt(index),ctx,rect,scale,{panel:true,clip:true})) drawn++;
       });
-    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true})){
+    }else if(state.composition==='pattern'&&drawHeightMapSource(buildPatternSource(board,Math.min(2400,Math.max(1200,Math.round(Math.max(board.w,board.h))))),ctx,board,scale,{fill:true})){
+      drawn++;
+    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true,contain:state.inputMode==='type'})){
       drawn++;
     }
     return drawn;
@@ -1348,7 +1831,7 @@ body.mosaic-mode .single-only{display:none}
     setExportBusy(true,size,'subject');
     await nextFrame();
     try{
-      if(state.composition!=='single'||!source.image.naturalWidth||!source.canvas.width) throw new Error('Auto Subject requires a single loaded image.');
+      if(state.composition!=='single'||!sourceReady(source)) throw new Error('Auto Subject requires a single loaded source.');
       var box=subjectBounds(source);
       if(!box) throw new Error('No active subject found.');
       var full=document.createElement('canvas');
@@ -1426,15 +1909,23 @@ body.mosaic-mode .single-only{display:none}
     reader.readAsDataURL(file);
   }
   function seed(){
-    var c=document.createElement('canvas'); c.width=900;c.height=900;var cctx=c.getContext('2d');
-    cctx.fillStyle='#060606';cctx.fillRect(0,0,900,900);cctx.fillStyle='#fff';cctx.textAlign='center';cctx.textBaseline='middle';
-    cctx.font='italic 260px Georgia';cctx.fillText('RELIEF',450,350);cctx.font='180px Georgia';cctx.fillText('IT',450,585);
-    cctx.lineWidth=18;cctx.strokeStyle='#fff';cctx.strokeRect(105,115,690,670);cctx.beginPath();cctx.arc(450,450,310,0,Math.PI*2);cctx.stroke();
-    loadData(c.toDataURL('image/png'),'sample-relief.png',false);
+    function createSeed(){
+      var c=document.createElement('canvas');c.width=1200;c.height=1200;var cctx=c.getContext('2d');
+      cctx.fillStyle='#060606';cctx.fillRect(0,0,c.width,c.height);cctx.fillStyle='#fff';cctx.textAlign='center';cctx.textBaseline='alphabetic';
+      var size=270, family='"EB Garamond", Georgia, serif';
+      cctx.font='400 '+size+'px '+family;
+      var metric=cctx.measureText('EMBOSS LAB'), maxWidth=900;
+      if(metric.width>maxWidth){size=Math.floor(size*maxWidth/metric.width);cctx.font='400 '+size+'px '+family;metric=cctx.measureText('EMBOSS LAB')}
+      var ascent=metric.actualBoundingBoxAscent||size*.72, descent=metric.actualBoundingBoxDescent||size*.2;
+      cctx.fillText('EMBOSS LAB',c.width/2,c.height/2+(ascent-descent)/2);
+      loadData(c.toDataURL('image/png'),'sample-emboss-lab.png',false,true);
+    }
+    createSeed();
+    if(document.fonts&&document.fonts.load){document.fonts.load('400 270px "EB Garamond"','EMBOSS LAB').then(function(){if(!imageUserLoaded)createSeed()}).catch(function(){})}
   }
   function createMaterials(){
     var root=document.getElementById('materials');
-    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
+    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
   }
   function animateSweep(time){
     if(!state.sweep)return;
@@ -1443,7 +1934,7 @@ body.mosaic-mode .single-only{display:none}
     var glide=.5-.5*Math.cos(progress*Math.PI*2);
     state.angle=Math.round(sweepBase-88+glide*176);
     document.getElementById('angle').value=state.angle;
-    updateValues();schedule();
+    updateValues();schedule(true);
     sweepFrame=requestAnimationFrame(animateSweep);
   }
   function toggleSweep(){
@@ -1530,14 +2021,14 @@ body.mosaic-mode .single-only{display:none}
     }
     requestAnimationFrame(frame);
   }
-  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','textureStrength','textureScale','textureDetail','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule()})});
+  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','patternSize','patternGap','patternRotation','patternOffset','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(id.indexOf('pattern')===0)clearPatternCache();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule(true)})});
   document.querySelectorAll('[data-finish]').forEach(function(b){b.addEventListener('click',function(){
     state.finish=b.dataset.finish;
     Object.assign(state,finishPresets[state.finish]||finishPresets.natural);
     ['finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).value=state[id]});
     updateValues();schedule();
   })});
-  ['base','back'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);schedule()})});
+  ['base','back'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);schedule(true)})});
   document.getElementById('surfaceTexture').addEventListener('change',function(){
     state.texture=this.value;
     var presets={grainProc:{textureStrength:16,textureScale:6,textureDetail:48},spots:{textureStrength:34,textureScale:88,textureDetail:8},clouds:{textureStrength:42,textureScale:68,textureDetail:38},cells:{textureStrength:38,textureScale:54,textureDetail:46}};
@@ -1549,17 +2040,28 @@ body.mosaic-mode .single-only{display:none}
     }
     clearTextureCache();updateValues();schedule();
   });
+  document.querySelectorAll('[data-input-mode]').forEach(function(button){button.addEventListener('click',function(){setInputMode(button.dataset.inputMode)})});
+  document.getElementById('typeText').addEventListener('input',function(){state.typeText=this.value;requestTypeRender(true)});
+  document.getElementById('typeFont').addEventListener('change',function(){state.typeFont=this.value;requestTypeRender(false)});
+  document.getElementById('typeWeight').addEventListener('change',function(){state.typeWeight=this.value;requestTypeRender(false)});
+  document.getElementById('typeTracking').addEventListener('input',function(){readState('typeTracking');updateValues();requestTypeRender(true)});
+  document.getElementById('typeLineHeight').addEventListener('input',function(){readState('typeLineHeight');updateValues();requestTypeRender(true)});
+  document.querySelectorAll('[data-type-align]').forEach(function(button){button.addEventListener('click',function(){state.typeAlign=button.dataset.typeAlign;updateValues();requestTypeRender(false)})});
+  document.getElementById('typeItalic').addEventListener('change',function(){readState('typeItalic');updateValues();requestTypeRender(false)});
+  document.getElementById('typeFontFile').addEventListener('change',function(){importTypeFont(this.files[0])});
   document.getElementById('invert').addEventListener('change',function(){readState('invert');clearHeightCaches();schedule()});
-  document.querySelectorAll('[data-source]').forEach(function(b){b.onclick=function(){state.source=b.dataset.source;clearHeightCaches();updateValues();schedule()}});
+  document.querySelectorAll('[data-source]').forEach(function(b){b.onclick=function(){state.source=b.dataset.source;imageHeightSource=state.source;clearHeightCaches();updateValues();schedule()}});
   document.querySelectorAll('[data-composition]').forEach(function(b){b.onclick=function(){
     state.composition=b.dataset.composition;
     if(state.composition==='mosaic'&&!mosaicLayout.length) shuffleMosaic();
     updateValues(); schedule();
-    setStatus(state.composition==='mosaic'?'Click a plus to load a panel. Drag to place, wheel to resize, right-click to remove.':'Drag across the preview to move the light.');
+    setStatus(state.composition==='mosaic'?'Click a plus to load a panel. Drag to place, wheel to resize, right-click to remove.':(state.composition==='pattern'?tr('patternStatus'):tr('status')));
   }});
   document.getElementById('file').addEventListener('change',function(){fileLoad(this.files[0])});
   [0,1,2,3].forEach(function(index){document.getElementById('panelFile'+index).addEventListener('change',function(){panelLoad(this.files[0],index)})});
-  document.getElementById('canvasRatio').addEventListener('change',function(){readState('canvasRatio');schedule()});
+  document.getElementById('canvasRatio').addEventListener('change',function(){readState('canvasRatio');clearPatternCache();schedule()});
+  document.getElementById('patternLayout').addEventListener('change',function(){readState('patternLayout');clearPatternCache();updateValues();schedule()});
+  document.getElementById('patternSeamless').addEventListener('change',function(){readState('patternSeamless');clearPatternCache();updateValues();schedule()});
   document.getElementById('exportSize').addEventListener('change',updateExportControls);
   document.getElementById('mosaicCount').addEventListener('change',function(){state.mosaicCount=+this.value;shuffleMosaic();updateValues();setStatus(state.mosaicCount+' panel grid ready.')});
   document.getElementById('shuffleMosaic').addEventListener('click',function(){shuffleMosaic();setStatus('Grid shuffled. Each panel keeps its uploaded relief.')});
@@ -1567,6 +2069,7 @@ body.mosaic-mode .single-only{display:none}
   document.getElementById('sweep').addEventListener('click',toggleSweep);
   document.getElementById('exportHeightMap').addEventListener('click',exportHeightMapPng);
   document.getElementById('exportSubject').addEventListener('click',exportSubjectPng);
+  document.getElementById('exportPatternTile').addEventListener('click',exportPatternTilePng);
   document.getElementById('exportSweep').addEventListener('click',exportSweep);
   document.getElementById('overlayFile').addEventListener('change',function(){overlayLoad(this.files[0])});
   document.getElementById('centerOverlay').addEventListener('click',function(){state.overlayX=0;state.overlayY=0;document.getElementById('overlayX').value=0;document.getElementById('overlayY').value=0;updateValues();schedule()});
@@ -1596,7 +2099,7 @@ body.mosaic-mode .single-only{display:none}
       e.preventDefault();
       state.overlayScale=clamp(state.overlayScale+(e.deltaY<0?8:-8),1,260);
       document.getElementById('overlayScale').value=state.overlayScale;
-      updateValues(); schedule();
+      updateValues(); schedule(true);
       setStatus('Overlay scale '+state.overlayScale+'%.');
       return;
     }
@@ -1609,7 +2112,7 @@ body.mosaic-mode .single-only{display:none}
     e.preventDefault();
     var source=sourceAt(panel.index), delta=e.deltaY<0?9:-9;
     source.panelScale=clamp(source.panelScale+delta,5,360);
-    schedule();
+    schedule(true);
     setStatus('Panel '+(panel.index+1)+' scale '+source.panelScale+'%.');
   }
   function removeMosaicPanel(e){
@@ -1663,7 +2166,7 @@ body.mosaic-mode .single-only{display:none}
       source.panelX=clamp(mosaicDrag.panelX+dx/Math.max(1,mosaicDrag.rect.w)*100,-220,220);
       source.panelY=clamp(mosaicDrag.panelY+dy/Math.max(1,mosaicDrag.rect.h)*100,-220,220);
     }
-    schedule();
+    schedule(true);
   }
   function stopStageDrag(e){
     if(mosaicDrag){
@@ -1693,12 +2196,12 @@ body.mosaic-mode .single-only{display:none}
     state.overlayY=clamp((centerY-(frame.y+frame.h/2))/frame.h*100,-220,220);
     document.getElementById('overlayX').value=Math.round(state.overlayX);
     document.getElementById('overlayY').value=Math.round(state.overlayY);
-    updateValues();schedule();
+    updateValues();schedule(true);
   }
-  function moveLight(e){var r=stage.getBoundingClientRect();state.angle=Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI);document.getElementById('angle').value=state.angle;updateValues();schedule()}
+  function moveLight(e){var r=stage.getBoundingClientRect();state.angle=Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI);document.getElementById('angle').value=state.angle;updateValues();schedule(true)}
   document.getElementById('export').onclick=exportPng;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal(helpModal);if(licenseUnlocked)closeModal(licenseModal)}});
-  setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();seed();new ResizeObserver(resizePreview).observe(stage);
+  setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();requestTypeRender(false);seed();new ResizeObserver(resizePreview).observe(stage);
 })();
 </script>
 </body>
