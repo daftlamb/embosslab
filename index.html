@@ -8,6 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&amp;family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Great+Vibes&amp;family=Instrument+Serif:ital@0;1&amp;family=Inter:ital,wght@0,300..900;1,300..900&amp;family=Montserrat:ital,wght@0,300..900;1,300..900&amp;family=Outfit:wght@300..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Roboto:ital,wght@0,300..900;1,300..900&amp;display=swap">
 <style>
+@font-face{font-family:"Source Han Sans CN";src:url("assets/fonts/SourceHanSansCN-VF.otf.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap;}
+@font-face{font-family:"Source Han Sans JP";src:url("assets/fonts/SourceHanSansJP-VF.otf.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap;}
+@font-face{font-family:"Source Han Serif CN";src:url("assets/fonts/SourceHanSerifCN-VF.otf.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap;}
+@font-face{font-family:"Source Han Serif JP";src:url("assets/fonts/SourceHanSerifJP-VF.otf.woff2") format("woff2");font-weight:200 900;font-style:normal;font-display:swap;}
 :root{
   --bg:#eee8e1;
   --panel:#faf6f1;
@@ -79,7 +83,7 @@ h1{margin:7px 0 5px;font:400 37px/1 'Instrument Serif',Georgia,serif;letter-spac
 .type-only{display:none}
 body.type-mode .type-only{display:grid}
 body.type-mode .image-only{display:none!important}
-.type-tools{gap:8px}
+.type-tools{gap:6px}.grid2.type-placement{grid-template-columns:1.2fr 1fr 1fr}.type-placement label{font-size:10px;color:var(--muted);display:grid;gap:4px}.type-placement input{width:100%;min-width:0;padding:6px;border:1px solid var(--line);border-radius:5px;background:#fffaf5}
 .type-copy{display:grid;gap:5px;color:var(--muted);font-size:11px}
 .type-copy textarea{width:100%;min-height:76px;max-height:280px;resize:vertical;overflow:auto;padding:9px;border:1px solid var(--line);border-radius:6px;background:#fffaf5;color:var(--text);line-height:1.35}
 .type-copy textarea::-webkit-resizer{background:linear-gradient(135deg,transparent 0 48%,#a6907c 50% 58%,transparent 60% 68%,#a6907c 70% 78%,transparent 80%)}
@@ -97,10 +101,17 @@ body.type-mode #panelThumb0{object-fit:contain;padding:4px;background:#fff}
 body.metal-mode .metal-only{display:block}
 .metal-controls{margin-top:9px;padding:9px 10px 7px;border:1px solid var(--line);border-radius:6px;background:rgba(245,239,231,.7)}
 .metal-controls .row:first-child{margin-top:0}
-.row{display:grid;grid-template-columns:1fr 42px;align-items:center;gap:8px;margin-top:8px}
+.row{display:grid;grid-template-columns:1fr 42px;align-items:center;gap:8px;margin-top:6px}
 .row label{font-size:12px;color:var(--text)}
 .value{text-align:right;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;margin:5px 0 0;accent-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;margin:3px 0 0;background:transparent;cursor:pointer;--range-progress:0%}
+input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,var(--accent) 0 var(--range-progress),var(--line) var(--range-progress) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;margin-top:-4px;border:0;border-radius:50%;background:var(--accent)}
+input[type=range]::-moz-range-track{height:2px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:2px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:10px;height:10px;border:0;border-radius:50%;background:var(--accent)}
+input[type=range]:focus-visible{outline:1px solid var(--accent);outline-offset:2px;border-radius:3px}
+input[type=range]:disabled{opacity:.4;cursor:default}
 select,.color,input[type=color]{
   min-height:34px;
   width:100%;
@@ -340,6 +351,11 @@ body.pattern-mode .btn.pattern-action{display:flex}
           <span><strong id="fileName">Upload image</strong><small>PNG alpha or grayscale works best. Drop an image here.</small></span>
         </label>
         <div class="type-tools type-only">
+          <label class="type-layer-heading" style="display:grid;gap:5px;font-size:11px;color:var(--muted)"><span>文字图层 / Text layers</span><select id="typeLayer" aria-label="Text layer"></select></label>
+          <div class="grid2"><button class="btn" id="addTypeLayer">＋ 新增</button><button class="btn" id="copyTypeLayer">复制图层</button></div>
+          <button class="btn" id="deleteTypeLayer">删除当前图层</button>
+          <div class="grid2 type-placement"><label>字号 / Size<input id="layerSize" type="number" min="1" max="1000" value="120"></label><label>X / %<input id="layerX" step="any" type="number" min="-100" max="200" value="50"></label><label>Y / %<input id="layerY" step="any" type="number" min="-100" max="200" value="50"></label></div>
+          <small style="color:var(--muted)">拖拽文字吸附对齐，滚轮调整字号；按住 Alt 暂停吸附。拖空白处调整光照。</small>
           <label class="type-copy"><span>Text / Monogram</span><textarea id="typeText" rows="3" spellcheck="false">EMBOSS LAB</textarea></label>
           <div class="grid2">
             <select id="typeFont" aria-label="Typeface">
@@ -360,6 +376,12 @@ body.pattern-mode .btn.pattern-action{display:flex}
               </optgroup>
               <optgroup label="Handwriting">
                 <option value="caveat">Caveat</option>
+              </optgroup>
+              <optgroup label="中文 / 日本語">
+                <option value="sourceHanSansCN">思源黑体 · 简体中文</option>
+                <option value="sourceHanSerifCN">思源宋体 · 简体中文</option>
+                <option value="sourceHanSansJP">源ノ角ゴシック · 日本語</option>
+                <option value="sourceHanSerifJP">源ノ明朝 · 日本語</option>
               </optgroup>
               <option value="custom" id="typeFontCustom" hidden>Imported font</option>
             </select>
@@ -411,7 +433,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
         <div class="row"><label for="ambient">Ambient</label><span class="value" id="ambientVal"></span></div>
         <input id="ambient" type="range" min="0" max="100" value="42">
         <div class="row"><label for="shine">Highlight</label><span class="value" id="shineVal"></span></div>
-        <input id="shine" type="range" min="0" max="100" value="72">
+        <input id="shine" type="range" min="0" max="100" value="22">
         <div class="row"><label for="sweepDuration">Sweep duration</label><span class="value" id="sweepDurationVal"></span></div>
         <input id="sweepDuration" type="range" min="2" max="8" value="4">
         <button class="btn" id="sweep" style="width:100%;margin-top:8px" type="button">Preview Light Sweep</button>
@@ -483,9 +505,9 @@ body.pattern-mode .btn.pattern-action{display:flex}
           <label><span class="title" style="display:block;margin-bottom:5px">Background</span><input class="color" id="back" type="color" value="#dfd4c7"></label>
         </div>
         <div class="row"><label for="grain">Grain</label><span class="value" id="grainVal"></span></div>
-        <input id="grain" type="range" min="0" max="100" value="24">
+        <input id="grain" type="range" min="0" max="100" value="3">
         <div class="row"><label for="rough">Roughness</label><span class="value" id="roughVal"></span></div>
-        <input id="rough" type="range" min="0" max="100" value="38">
+        <input id="rough" type="range" min="0" max="100" value="84">
         <div class="metal-only metal-controls">
           <div class="row"><label for="reflectionScale">Reflection size</label><span class="value" id="reflectionScaleVal"></span></div>
           <input id="reflectionScale" type="range" min="0" max="100" value="74">
@@ -501,13 +523,28 @@ body.pattern-mode .btn.pattern-action{display:flex}
           <option value="grainProc">Fine Grain</option>
           <option value="spots">Sparse Spots</option>
           <option value="cells">Soft Cells</option>
+          <option value="stoneScan">Weathered stone</option>
+          <option value="leatherScan">Natural leather</option>
+          <option value="paperScan">Paper fibers</option>
+          <option value="plasterScan">Plaster pores</option>
+          <option value="brushedScan">Brushed metal</option>
+          <option value="foilScan">Foil creases</option>
+          <option value="ironScan">Aged iron</option>
+          <option value="ceramicScan">Ceramic glaze</option>
+          <option value="waxScan">Melted wax</option>
         </select>
         <div class="row"><label for="textureStrength">Texture strength</label><span class="value" id="textureStrengthVal"></span></div>
-        <input id="textureStrength" type="range" min="0" max="100" value="0">
+        <input id="textureStrength" type="range" min="0" max="100" value="50">
         <div class="row"><label for="textureScale">Texture scale</label><span class="value" id="textureScaleVal"></span></div>
-        <input id="textureScale" type="range" min="0" max="100" value="58">
+        <input id="textureScale" type="range" min="0" max="100" value="36">
         <div class="row"><label for="textureDetail">Texture detail</label><span class="value" id="textureDetailVal"></span></div>
-        <input id="textureDetail" type="range" min="0" max="100" value="42">
+        <input id="textureDetail" type="range" min="0" max="100" value="32">
+        <div id="weatheringControls" hidden>
+          <div class="row"><label for="surfaceSheen">Surface sheen</label><span class="value" id="surfaceSheenVal"></span></div>
+          <input id="surfaceSheen" type="range" min="0" max="100" value="5">
+          <div class="row"><label for="weathering">Weathering</label><span class="value" id="weatheringVal"></span></div>
+          <input id="weathering" type="range" min="0" max="100" value="8">
+        </div>
       </section>
       <section class="group">
         <h2 class="title">Finish</h2>
@@ -628,6 +665,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     </div>
   </div>
 </div>
+<script src="assets/material-surfaces.js"></script>
+<script src="assets/highlight-finish.js"></script>
 <script>
 (function(){
   var preview = document.getElementById('preview');
@@ -669,17 +708,18 @@ body.pattern-mode .btn.pattern-action{display:flex}
   var sweepBase = 0;
   var licenseUnlocked = false;
   var state = {
-    inputMode:'type', source:'alpha', invert:false, height:48, soft:10, contrast:118, threshold:6, bevel:34,
-    typeText:'EMBOSS LAB', typeFont:'ebGaramond', typeWeight:'400', typeTracking:0, typeLineHeight:116, typeAlign:'center', typeItalic:false,
-    angle:-42, lightHeight:58, ambient:42, shine:72, sweepDuration:4, sweep:false, grain:24, rough:38,
-    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'none', textureStrength:0, textureScale:58, textureDetail:42, reflectionScale:74, reflectionTexture:30, reflectionRotation:0,
+    inputMode:'type', source:'alpha', invert:true, height:16, soft:34, contrast:32, threshold:29, bevel:28,
+    typeText:'CARVE THE INVISIBLE', typeFont:'ebGaramond', typeWeight:'700', typeTracking:-30, typeLineHeight:116, typeAlign:'center', typeItalic:false,
+    angle:-94, lightHeight:20, ambient:95, shine:46, sweepDuration:4, sweep:false, grain:3, rough:34,
+    base:'#e7e0d5', back:'#dfd4c7', material:'paper', texture:'paperScan', textureStrength:81, textureScale:36, textureDetail:32, weathering:8, surfaceSheen:5, reflectionScale:74, reflectionTexture:30, reflectionRotation:0,
     composition:'single', mosaicCount:4,
     patternLayout:'grid', patternSize:26, patternGap:32, patternRotation:0, patternOffset:50, patternSeamless:true,
-    canvasRatio:'1', reliefScale:100, reliefX:0, reliefY:0,
+    canvasRatio:'1', reliefScale:86, reliefX:0, reliefY:0,
     overlayOpacity:88, overlayScale:100, overlayX:0, overlayY:0,
-    finish:'natural', finishSaturation:100, finishContrast:100, finishSharpness:0, finishClarity:0, finishHighlight:0, finishBloom:0, finishWarmth:0,
+    finish:'custom', finishSaturation:100, finishContrast:100, finishSharpness:6, finishClarity:19, finishHighlight:8, finishBloom:14, finishWarmth:-46,
     lang:localStorage.getItem('embossLabLang')||'en'
   };
+  var sliderDefaults=Object.assign({},state);
   var finishPresets = {
     natural:{finishSaturation:100,finishContrast:100,finishSharpness:0,finishClarity:0,finishHighlight:0,finishBloom:0,finishWarmth:0},
     crisp:{finishSaturation:112,finishContrast:116,finishSharpness:34,finishClarity:22,finishHighlight:16,finishBloom:10,finishWarmth:4},
@@ -687,16 +727,17 @@ body.pattern-mode .btn.pattern-action{display:flex}
     product:{finishSaturation:116,finishContrast:124,finishSharpness:42,finishClarity:32,finishHighlight:24,finishBloom:16,finishWarmth:18}
   };
   var materials = {
-    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:24,rough:44,shine:56,height:44,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
-    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:8,rough:68,shine:42,height:52,texture:'clouds',textureStrength:46,textureScale:68,textureDetail:38,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
-    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:34,rough:20,shine:92,height:52,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:72,reflectionTexture:30,reflectionRotation:0},
-    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:16,rough:8,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:64,reflectionTexture:22,reflectionRotation:0},
-    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:8,rough:9,shine:100,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:52,reflectionTexture:68,reflectionRotation:0},
-    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:28,rough:16,shine:100,height:54,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:88,reflectionTexture:18,reflectionRotation:0},
-    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:58,rough:60,shine:62,height:60,texture:'cells',textureStrength:42,textureScale:48,textureDetail:50,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
-    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:10,rough:18,shine:84,height:50,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
-    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:50,rough:72,shine:35,height:36,texture:'grainProc',textureStrength:34,textureScale:44,textureDetail:58,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
-    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:17,rough:34,shine:78,height:58,texture:'none',textureStrength:0,textureScale:58,textureDetail:42,reflectionScale:74,reflectionTexture:30,reflectionRotation:0}
+    paper:{name:'Blind Paper',zh:'盲压纸张',base:'#e7e0d5',back:'#dfd4c7',grain:3,rough:84,shine:22,height:44,texture:'paperScan',textureStrength:50,textureScale:36,textureDetail:32,weathering:8,surfaceSheen:5,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    plaster:{name:'Soft Plaster',zh:'柔和石膏',base:'#e2ddd2',back:'#cec5b7',grain:3,rough:82,shine:25,height:52,texture:'plasterScan',textureStrength:42,textureScale:48,textureDetail:30,weathering:15,surfaceSheen:4,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    stone:{name:'Weathered Stone',zh:'风化石材',base:'#c9c2ae',back:'#a59a82',grain:2,rough:48,shine:62,height:52,texture:'stoneScan',textureStrength:48,textureScale:38,textureDetail:22,weathering:38,surfaceSheen:48,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    silver:{name:'Aluminium',zh:'铝板',base:'#d1d3d4',back:'#c7c8ca',grain:2,rough:24,shine:92,height:52,texture:'brushedScan',textureStrength:38,textureScale:45,textureDetail:28,weathering:8,surfaceSheen:62,reflectionScale:72,reflectionTexture:30,reflectionRotation:0},
+    chrome:{name:'Chrome Plate',zh:'镀铬',base:'#e3e6e7',back:'#777d82',grain:1,rough:12,shine:100,height:54,texture:'brushedScan',textureStrength:15,textureScale:52,textureDetail:14,weathering:3,surfaceSheen:85,reflectionScale:64,reflectionTexture:22,reflectionRotation:0},
+    toxic:{name:'Toxic Chrome',zh:'弯曲铬面',base:'#a8c8a6',back:'#090b09',grain:1,rough:12,shine:100,height:58,texture:'brushedScan',textureStrength:24,textureScale:48,textureDetail:24,weathering:8,surfaceSheen:82,reflectionScale:52,reflectionTexture:68,reflectionRotation:0},
+    gold:{name:'Golden Foil',zh:'金箔',base:'#d3a243',back:'#76501d',grain:2,rough:23,shine:95,height:54,texture:'foilScan',textureStrength:36,textureScale:56,textureDetail:28,weathering:12,surfaceSheen:68,reflectionScale:88,reflectionTexture:18,reflectionRotation:0},
+    iron:{name:'Cast Iron',zh:'铸铁',base:'#7e7a73',back:'#615d58',grain:3,rough:62,shine:58,height:60,texture:'ironScan',textureStrength:58,textureScale:44,textureDetail:46,weathering:28,surfaceSheen:26,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    ceramic:{name:'Porcelain',zh:'瓷面',base:'#ebe8e0',back:'#d9d3c7',grain:1,rough:22,shine:78,height:50,texture:'ceramicScan',textureStrength:22,textureScale:30,textureDetail:18,weathering:5,surfaceSheen:72,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    leather:{name:'Leather Press',zh:'皮革压印',base:'#8c6650',back:'#71503f',grain:2,rough:43,shine:65,height:36,texture:'leatherScan',textureStrength:76,textureScale:48,textureDetail:50,weathering:25,surfaceSheen:56,reflectionScale:74,reflectionTexture:30,reflectionRotation:0},
+    wax:{name:'Wax Seal',zh:'蜡封',base:'#a5463d',back:'#6e302b',grain:2,rough:32,shine:70,height:58,texture:'waxScan',textureStrength:24,textureScale:52,textureDetail:20,weathering:4,surfaceSheen:58,reflectionScale:74,reflectionTexture:30,reflectionRotation:0}
   };
   var i18n = {
     en:{
@@ -707,7 +748,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       composition:'Composition',sourceRatio:'Source Ratio',square:'Square 1:1',portrait45:'Portrait 4:5',portrait34:'Portrait 3:4',landscape43:'Landscape 4:3',wide169:'Wide 16:9',centerRelief:'Center Relief',single:'Single',pattern:'Pattern',mosaic:'Mosaic',shuffle:'Shuffle Grid',
       patternLayout:'Repeat layout',patternGrid:'Grid',patternBrick:'Brick',patternHalfDrop:'Half-drop',patternMirror:'Mirror',patternSize:'Motif size',patternGap:'Spacing',patternRotation:'Rotation',patternOffset:'Stagger',patternSeamless:'Seamless edges',exportPatternTile:'Pattern Tile',patternStatus:'Pattern mode: adjust the repeat, then drag the preview to move the light.',typeStatus:'Type source ready. Try it with Pattern for a repeating monogram.',fontLoaded:'Custom font loaded.',fontFailed:'This font could not be loaded.',
       panels3:'3 Panels',panels4:'4 Panels',panelMain:'Main image',panelUpload:'Upload image',reliefScale:'Relief scale',horizontal:'Horizontal',vertical:'Vertical',
-      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',reflectionScale:'Reflection size',reflectionTexture:'Reflection variation',reflectionRotation:'Reflection rotation',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',
+      material:'Material',surface:'Surface',background:'Background',grain:'Grain',rough:'Roughness',reflectionScale:'Reflection size',reflectionTexture:'Reflection variation',reflectionRotation:'Reflection rotation',surfaceTexture:'Surface texture',none:'None',clouds:'Soft Clouds',fineGrain:'Fine Grain',spots:'Sparse Spots',cells:'Soft Cells',textureStrength:'Texture strength',textureScale:'Texture scale',textureDetail:'Texture detail',weathering:'Weathering',surfaceSheen:'Surface sheen',paperScan:'Paper fibers',plasterScan:'Plaster pores',brushedScan:'Brushed metal',foilScan:'Foil creases',ironScan:'Aged iron',ceramicScan:'Ceramic glaze',waxScan:'Melted wax',stoneScan:'Weathered stone',leatherScan:'Natural leather',
       finish:'Finish',finishSaturation:'Saturation',finishContrast:'Final contrast',finishSharpness:'Sharpness',finishClarity:'Clarity',finishHighlight:'Highlight boost',finishBloom:'Bloom',finishWarmth:'Gold warmth',
       overlay:'Overlay',overlayName:'Transparent overlay',overlayHint:'PNG, WebP, or SVG. It stays above the relief.',opacity:'Opacity',scale:'Scale',center:'Center',clear:'Clear',blank:'Blank',
       exportPng:'PNG Export',exportHeightMap:'Height Map',exportSubject:'Subject PNG',exportSweep:'Light Sweep',status:'Drag across the preview to move the light.',dropHint:'Drop a logo, drawing, or black-white image',shading:'Height field shading',
@@ -730,7 +771,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       composition:'构图',sourceRatio:'原图比例',square:'正方形 1:1',portrait45:'竖版 4:5',portrait34:'竖版 3:4',landscape43:'横版 4:3',wide169:'宽屏 16:9',centerRelief:'居中浮雕',single:'单图',pattern:'纹样',mosaic:'拼版',shuffle:'随机网格',
       patternLayout:'重复方式',patternGrid:'网格',patternBrick:'砖式错排',patternHalfDrop:'半落式',patternMirror:'镜像',patternSize:'图案大小',patternGap:'图案间距',patternRotation:'图案旋转',patternOffset:'错位比例',patternSeamless:'无缝环绕',exportPatternTile:'纹样单元',patternStatus:'纹样模式：调整重复方式，在预览区拖动可移动灯光。',typeStatus:'文字高度源已生成，可以配合 Pattern 制作连续字母纹样。',fontLoaded:'自定义字体已载入。',fontFailed:'无法载入这个字体文件。',
       panels3:'3 个面板',panels4:'4 个面板',panelMain:'主图',panelUpload:'上传图像',reliefScale:'浮雕缩放',horizontal:'水平位置',vertical:'垂直位置',
-      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',reflectionScale:'反射尺寸',reflectionTexture:'反射变化',reflectionRotation:'反射旋转',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',
+      material:'材质',surface:'表面',background:'背景',grain:'颗粒',rough:'粗糙度',reflectionScale:'反射尺寸',reflectionTexture:'反射变化',reflectionRotation:'反射旋转',surfaceTexture:'表面纹理',none:'无',clouds:'柔和云纹',fineGrain:'细颗粒',spots:'稀疏斑点',cells:'柔和细胞纹',textureStrength:'纹理强度',textureScale:'纹理尺寸',textureDetail:'纹理细节',weathering:'做旧程度',surfaceSheen:'表面光泽',paperScan:'纸张纤维',plasterScan:'石膏细孔',brushedScan:'金属拉丝',foilScan:'箔面褶皱',ironScan:'旧铁表面',ceramicScan:'陶瓷釉面',waxScan:'熔蜡纹理',stoneScan:'风化石材',leatherScan:'天然皮纹',
       overlay:'叠加',overlayName:'透明叠加图',overlayHint:'支持 PNG、WebP 或 SVG，会显示在浮雕上方。',opacity:'不透明度',scale:'缩放',center:'居中',clear:'清空',blank:'空白',
       exportPng:'导出 PNG',exportHeightMap:'灰度高度图',exportSubject:'主体 PNG',exportSweep:'扫光视频',status:'在预览区拖动可移动灯光。',dropHint:'拖入标志、手绘稿或黑白图像',shading:'高度场明暗预览',
       help:'帮助',close:'关闭',helpTitle:'帮助',
@@ -755,6 +796,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
   function setAll(list){list.forEach(function(item){setText(item[0],tr(item[1]))})}
   function setOption(select,value,key){var el=document.querySelector(select+' option[value="'+value+'"]');if(el)el.textContent=tr(key)}
   function applyLanguage(){
+    document.querySelectorAll('input[type=range]').forEach(function(el){el.title=state.lang==='zh'?'双击滑杆恢复默认值':'Double-click to reset to default'});
     document.documentElement.lang=state.lang==='zh'?'zh-CN':'en';
     localStorage.setItem('embossLabLang',state.lang);
     setAll([
@@ -763,7 +805,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       ['.scroll .group:nth-of-type(2) .title','relief'],['label[for="height"]','height'],['label[for="soft"]','soft'],['label[for="contrast"]','contrast'],['label[for="threshold"]','threshold'],['label[for="bevel"]','bevel'],
       ['.scroll .group:nth-of-type(3) .title','lighting'],['label[for="angle"]','angle'],['label[for="lightHeight"]','lightHeight'],['label[for="ambient"]','ambient'],['label[for="shine"]','shine'],['label[for="sweepDuration"]','sweepDuration'],
       ['.scroll .group:nth-of-type(4) .title','composition'],['#centerRelief','centerRelief'],['[data-composition="single"]','single'],['[data-composition="pattern"]','pattern'],['[data-composition="mosaic"]','mosaic'],['#shuffleMosaic','shuffle'],['label[for="patternSize"]','patternSize'],['label[for="patternGap"]','patternGap'],['label[for="patternRotation"]','patternRotation'],['label[for="patternOffset"]','patternOffset'],['.pattern-tools .toggle span','patternSeamless'],['label[for="reliefScale"]','reliefScale'],['label[for="reliefX"]','horizontal'],['label[for="reliefY"]','vertical'],
-      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="reflectionScale"]','reflectionScale'],['label[for="reflectionTexture"]','reflectionTexture'],['label[for="reflectionRotation"]','reflectionRotation'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],
+      ['.scroll .group:nth-of-type(5) .title','material'],['label[for="grain"]','grain'],['label[for="rough"]','rough'],['label[for="reflectionScale"]','reflectionScale'],['label[for="reflectionTexture"]','reflectionTexture'],['label[for="reflectionRotation"]','reflectionRotation'],['label[for="surfaceTexture"]','surfaceTexture'],['label[for="textureStrength"]','textureStrength'],['label[for="textureScale"]','textureScale'],['label[for="textureDetail"]','textureDetail'],['label[for="weathering"]','weathering'],['label[for="surfaceSheen"]','surfaceSheen'],
       ['.scroll .group:nth-of-type(6) .title','finish'],['label[for="finishSaturation"]','finishSaturation'],['label[for="finishContrast"]','finishContrast'],['label[for="finishSharpness"]','finishSharpness'],['label[for="finishClarity"]','finishClarity'],['label[for="finishHighlight"]','finishHighlight'],['label[for="finishBloom"]','finishBloom'],['label[for="finishWarmth"]','finishWarmth'],
       ['.scroll .group:nth-of-type(7) .title','overlay'],['#overlayName','overlayName'],['.scroll .group:nth-of-type(7) .upload small','overlayHint'],['label[for="overlayOpacity"]','opacity'],['label[for="overlayScale"]','scale'],['label[for="overlayX"]','horizontal'],['label[for="overlayY"]','vertical'],['#centerOverlay','center'],['#clearOverlay','clear'],['.blank-label','blank'],
       ['#export','exportPng'],['#exportHeightMap','exportHeightMap'],['#exportSubject','exportSubject'],['#exportPatternTile','exportPatternTile'],['#exportSweep','exportSweep'],['#status','status'],['.drop-hint','dropHint'],['.toolbar .pill:first-child','shading'],['#helpBtn','help'],['#helpClose','close'],['#helpTitle','helpTitle'],
@@ -790,7 +832,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     setOption('#patternLayout','grid','patternGrid');setOption('#patternLayout','brick','patternBrick');setOption('#patternLayout','halfDrop','patternHalfDrop');setOption('#patternLayout','mirror','patternMirror');
     setOption('#typeWeight','300','fontLight');setOption('#typeWeight','400','fontRegular');setOption('#typeWeight','500','fontMedium');setOption('#typeWeight','700','fontBold');setOption('#typeWeight','900','fontBlack');
     setOption('#mosaicCount','3','panels3');setOption('#mosaicCount','4','panels4');
-    setOption('#surfaceTexture','none','none');setOption('#surfaceTexture','clouds','clouds');setOption('#surfaceTexture','grainProc','fineGrain');setOption('#surfaceTexture','spots','spots');setOption('#surfaceTexture','cells','cells');
+    setOption('#surfaceTexture','none','none');setOption('#surfaceTexture','clouds','clouds');setOption('#surfaceTexture','grainProc','fineGrain');setOption('#surfaceTexture','spots','spots');setOption('#surfaceTexture','cells','cells');setOption('#surfaceTexture','stoneScan','stoneScan');setOption('#surfaceTexture','leatherScan','leatherScan');
+    ['paperScan','plasterScan','brushedScan','foilScan','ironScan','ceramicScan','waxScan'].forEach(function(key){setOption('#surfaceTexture',key,key)});
     document.querySelectorAll('.material').forEach(function(b){var key=b.dataset.material,m=materials[key];b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name)});
     updateValues();
     if(state.composition==='pattern')setStatus(tr('patternStatus'));
@@ -816,12 +859,17 @@ body.pattern-mode .btn.pattern-action{display:flex}
   function clearHeightCaches(){heightCache=null;panelSources.forEach(function(source){source.heightCache=null;source.blendMask=null});invalidatePatternHeight()}
   function clearTextureCache(){textureCache.key='';textureCache.canvas=null}
   function updateValues(){
-    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','patternSize','patternGap','patternRotation','patternOffset','typeTracking','typeLineHeight','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
+    document.querySelectorAll('input[type=range]').forEach(function(el){
+      if(Object.prototype.hasOwnProperty.call(state,el.id))el.value=state[el.id];
+      el.style.setProperty('--range-progress',((Number(el.value)-Number(el.min))/(Number(el.max)-Number(el.min))*100)+'%');
+    });
+    ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','weathering','surfaceSheen','patternSize','patternGap','patternRotation','patternOffset','typeTracking','typeLineHeight','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){
       var el=document.getElementById(id+'Val'); if(el) el.textContent=document.getElementById(id).value+((id==='angle'||id==='reflectionRotation')?' deg':(id==='sweepDuration'?' s':(id==='typeLineHeight'?'%':'')));
     });
     document.getElementById('base').value=state.base;
     document.getElementById('back').value=state.back;
     document.getElementById('surfaceTexture').value=state.texture;
+    document.getElementById('weatheringControls').hidden=!MaterialSurfaces.supports(state.texture);
     document.getElementById('canvasRatio').value=state.canvasRatio;
     document.getElementById('patternLayout').value=state.patternLayout;
     document.getElementById('patternSeamless').checked=state.patternSeamless;
@@ -831,6 +879,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     document.getElementById('typeTracking').value=state.typeTracking;
     document.getElementById('typeLineHeight').value=state.typeLineHeight;
     document.getElementById('typeItalic').checked=state.typeItalic;
+    document.getElementById('invert').checked=!!state.invert;
+    document.getElementById('invertLabel').textContent=state.inputMode==='type'?(state.lang==='zh'?'当前文字层凹刻':'Engrave this text layer'):tr('invert');
     document.querySelectorAll('[data-type-align]').forEach(function(b){var active=b.dataset.typeAlign===state.typeAlign;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false')});
     document.getElementById('textureStrength').disabled=state.texture==='none';
     document.getElementById('textureScale').disabled=state.texture==='none';
@@ -853,7 +903,9 @@ body.pattern-mode .btn.pattern-action{display:flex}
     var families={
       outfit:'Outfit, Arial, sans-serif',montserrat:'Montserrat, Arial, sans-serif',roboto:'Roboto, Arial, sans-serif',inter:'Inter, Arial, sans-serif',
       ebGaramond:'"EB Garamond", Georgia, serif',playfair:'"Playfair Display", Georgia, serif',cormorant:'"Cormorant Garamond", Georgia, serif',instrument:'"Instrument Serif", Georgia, serif',
-      caveat:'Caveat, cursive',greatVibes:'"Great Vibes", cursive'
+      sourceHanSansCN:'"Source Han Sans CN", "Source Han Sans JP", sans-serif',sourceHanSerifCN:'"Source Han Serif CN", "Source Han Serif JP", serif',
+      sourceHanSansJP:'"Source Han Sans JP", "Source Han Sans CN", sans-serif',sourceHanSerifJP:'"Source Han Serif JP", "Source Han Serif CN", serif',
+      caveat:'Caveat, cursive' ,greatVibes:'"Great Vibes", cursive'
     };
     return families[state.typeFont]||families.instrument;
   }
@@ -897,9 +949,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     ctx.drawImage(source.canvas,x,y,fit[0],fit[1]);
     var url=out.toDataURL('image/png');thumb.src=url;document.getElementById('panelThumb0').src=url;
   }
-  function renderTypeSource(interactive){
-    if(state.inputMode!=='type')return;
-    var source=sourceAt(0), text=(state.typeText||'').replace(/\r/g,''), lines=text.split('\n');
+  function paintTypeLayer(interactive){
+    var source={canvas:document.createElement('canvas')}, text=(state.typeText||'').replace(/\r/g,''), lines=text.split('\n');
     var baseSize=1440, baseTracking=state.typeTracking*2, measure=document.createElement('canvas').getContext('2d');
     measure.font=typeFontCss(baseSize);measure.textBaseline='alphabetic';
     var sample=measure.measureText('Hgjy'), fallback={ascent:sample.actualBoundingBoxAscent||baseSize*.78,descent:sample.actualBoundingBoxDescent||baseSize*.24};
@@ -917,14 +968,65 @@ body.pattern-mode .btn.pattern-action{display:flex}
     source.canvas.width=width;source.canvas.height=height;source.ctx=source.canvas.getContext('2d',{willReadFrequently:true});
     source.ctx.clearRect(0,0,width,height);
     if(!empty){
-      source.ctx.fillStyle='#fff';source.ctx.font=typeFontCss(baseSize*scale);source.ctx.textBaseline='alphabetic';
+      source.ctx.fillStyle=state.invert?'#000':'#fff';source.ctx.font=typeFontCss(baseSize*scale);source.ctx.textBaseline='alphabetic';
       var baseline=(padding-minTop)*scale, textAnchor=state.typeAlign==='left'?padding*scale:(state.typeAlign==='right'?width-padding*scale:width/2);
       for(var line=0;line<lines.length;line++){
         drawTypeLine(source.ctx,lines[line],textAnchor,baseline+line*lineAdvance*scale,baseTracking*scale,metrics[line],scale,state.typeAlign);
       }
     }
+    source.canvas.emSize=baseSize*scale;return source.canvas;
+  }
+  var typeLayerKeys=['typeText','typeFont','typeWeight','typeTracking','typeLineHeight','typeAlign','typeItalic','invert'];
+  var typeLayers=[
+    {typeText:'CARVE THE INVISIBLE',typeFont:'ebGaramond',typeWeight:'700',typeTracking:-30,typeLineHeight:116,typeAlign:'center',typeItalic:false,invert:true,size:62,x:50,y:61.71,customFamily:null},
+    {typeText:'刻于无形',typeFont:'sourceHanSansCN',typeWeight:'900',typeTracking:50,typeLineHeight:116,typeAlign:'center',typeItalic:false,invert:false,size:224,x:50,y:43.39,customFamily:null}
+  ], activeTypeLayer=0;
+  function saveTypeLayer(){
+    if(!typeLayers.length)typeLayers.push({size:120,x:50,y:50});
+    typeLayerKeys.forEach(function(key){typeLayers[activeTypeLayer][key]=state[key]});
+    typeLayers[activeTypeLayer].customFamily=customTypeFamily;
+  }
+  function updateTypeLayers(){
+    var select=document.getElementById('typeLayer');select.textContent='';
+    typeLayers.forEach(function(layer,index){var option=document.createElement('option');option.value=index;option.textContent=(index+1)+' · '+(layer.typeText.replace(/\s+/g,' ').slice(0,22)||'空文字');select.appendChild(option)});
+    select.value=activeTypeLayer;
+    var layer=typeLayers[activeTypeLayer];
+    document.getElementById('layerSize').value=layer.size;document.getElementById('layerX').value=layer.x;document.getElementById('layerY').value=layer.y;
+    document.getElementById('deleteTypeLayer').disabled=typeLayers.length===1;
+  }
+  function selectTypeLayer(index){
+    typeGuidesVisible=true;
+    activeTypeLayer=index;var layer=typeLayers[index];
+    typeLayerKeys.forEach(function(key){state[key]=layer[key]});customTypeFamily=layer.customFamily;
+    document.getElementById('typeText').value=layer.typeText;
+    updateValues();updateTypeLayers();requestTypeRender(false);
+  }
+  function loadTypeLayerFonts(){
+    saveTypeLayer();var current=Object.assign({},state),family=customTypeFamily,needsLoad=false;
+    var pending=typeLayers.map(function(layer){typeLayerKeys.forEach(function(key){state[key]=layer[key]});customTypeFamily=layer.customFamily;needsLoad=needsLoad||!document.fonts.check(typeFontCss(96),layer.typeText||'A');return document.fonts.load(typeFontCss(96),layer.typeText||'A')});
+    Object.assign(state,current);customTypeFamily=family;return Promise.all(pending).then(function(){return needsLoad});
+  }
+  function renderTypeSource(interactive){
+    if(state.inputMode!=='type')return;
+    saveTypeLayer();updateTypeLayers();
+    var source=sourceAt(0), current=Object.assign({},state), family=customTypeFamily, edge=interactive?1050:2400;
+    var minX=0,minY=0,maxX=1000,maxY=1000;
+    var layers=typeLayers.map(function(layer){
+      typeLayerKeys.forEach(function(key){state[key]=layer[key]});customTypeFamily=layer.customFamily;
+      var painted=paintTypeLayer(interactive),scale=layer.size/painted.emSize,w=painted.width*scale,h=painted.height*scale;
+      var rect={x:10*layer.x-w/2,y:10*layer.y-h/2,w:w,h:h};
+      minX=Math.min(minX,rect.x);minY=Math.min(minY,rect.y);maxX=Math.max(maxX,rect.x+w);maxY=Math.max(maxY,rect.y+h);
+      return {canvas:painted,rect:rect,size:layer.size};
+    });
+    var bounds={x:minX,y:minY,w:maxX-minX,h:maxY-minY},density=edge/Math.max(bounds.w,bounds.h);
+    source.typeBounds=bounds;source.typeRects=layers.map(function(layer){return layer.rect});
+    source.typeSizes=layers.map(function(layer){return layer.size});
+    source.canvas.width=Math.ceil(bounds.w*density);source.canvas.height=Math.ceil(bounds.h*density);source.ctx=source.canvas.getContext('2d',{willReadFrequently:true});
+    layers.forEach(function(layer){var r=layer.rect;source.ctx.drawImage(layer.canvas,(r.x-minX)*density,(r.y-minY)*density,r.w*density,r.h*density)});
+    Object.assign(state,current);customTypeFamily=family;
+    var text=typeLayers.map(function(layer){return layer.typeText}).join(' / ');
     var label=text.replace(/\s+/g,' ').trim()||tr('typeMode');
-    source.name='Type · '+label;source.userLoaded=true;source.generated=true;
+    source.name='Type · '+label;source.userLoaded=true;source.generated=true;source.signedHeight=true;
     source.heightCache=null;source.blendMask=null;heightCache=null;invalidatePatternHeight();
     document.getElementById('panelName0').textContent=label.length>12?label.slice(0,11)+'…':label;
     updateTypeThumbnail();schedule(!!interactive);
@@ -942,23 +1044,31 @@ body.pattern-mode .btn.pattern-action{display:flex}
     }
     if(interactive)refine();
     if(document.fonts&&document.fonts.load){
-      document.fonts.load(typeFontCss(96),state.typeText||'A').then(function(){
-        refine();
+      loadTypeLayerFonts().then(function(loaded){
+        if(loaded)refine();
       }).catch(function(){});
     }
   }
+  var imageInvert=false;
   function setInputMode(mode){
     var source=sourceAt(0);
     if(mode==='type'){
-      if(state.inputMode==='image')imageHeightSource=state.source;
+      if(state.inputMode==='image'){imageHeightSource=state.source;imageInvert=state.invert;state.invert=typeLayers.length?!!typeLayers[activeTypeLayer].invert:false}
       state.inputMode='type';state.source='alpha';updateValues();requestTypeRender(false);setStatus(tr('typeStatus'));
       return;
     }
-    state.inputMode='image';state.source=imageHeightSource;source.userLoaded=imageUserLoaded;source.generated=false;source.name=loadedName;
+    if(state.inputMode==='type')saveTypeLayer();
+    state.invert=imageInvert;state.inputMode='image';state.source=imageHeightSource;source.userLoaded=imageUserLoaded;source.generated=false;source.signedHeight=false;source.name=loadedName;
     document.getElementById('fileName').textContent=imageUserLoaded?shortName(loadedName):tr('upload');
     document.getElementById('panelName0').textContent=shortName(loadedName);
     if(image.src){thumb.src=image.src;document.getElementById('panelThumb0').src=image.src}
     updateValues();rebuildSource(source);setStatus(tr('status'));
+  }
+  async function prepareTypeExport(){
+    if(state.inputMode!=='type')return;
+    if(document.fonts&&document.fonts.load)await loadTypeLayerFonts();
+    clearTimeout(typeRefineTimer);
+    renderTypeSource(false);
   }
   async function importTypeFont(file){
     if(!file)return;
@@ -966,7 +1076,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       if(typeof FontFace==='undefined')throw new Error('FontFace API unavailable');
       var family='EmbossUserFont'+Date.now(), buffer=await file.arrayBuffer(), face=new FontFace(family,buffer);
       await face.load();
-      if(customTypeFace&&document.fonts&&document.fonts.delete)document.fonts.delete(customTypeFace);
+
       document.fonts.add(face);customTypeFace=face;customTypeFamily=family;
       var option=document.getElementById('typeFontCustom');option.hidden=false;option.textContent=file.name;
       document.getElementById('typeFontName').textContent=file.name;
@@ -982,7 +1092,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     source.canvas.width=s[0]; source.canvas.height=s[1];
     source.ctx.clearRect(0,0,s[0],s[1]);
     source.ctx.drawImage(source.image,0,0,s[0],s[1]);
-    source.generated=false;
+    source.generated=false;source.signedHeight=false;
     source.heightCache=null;
     source.blendMask=null;
     if(source===sourceAt(0)){heightCache=null;invalidatePatternHeight()}
@@ -993,16 +1103,16 @@ body.pattern-mode .btn.pattern-action{display:flex}
     if(source.heightCache) return source.heightCache;
     var raw=source.ctx.getImageData(0,0,source.canvas.width,source.canvas.height);
     var data=raw.data, len=source.canvas.width*source.canvas.height, h=new Float32Array(len);
-    source.blendMask=sourceBlendMask(data,source.canvas.width,source.canvas.height);
+    source.blendMask=source.generated?null:sourceBlendMask(data,source.canvas.width,source.canvas.height);
     var c=state.contrast/100, cut=state.threshold/100, heightSource=heightSourceFor(source);
     for(var i=0;i<len;i++){
       var p=i*4, a=data[p+3]/255, l=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
       var v=heightSource==='alpha'?a:l;
       if(heightSource==='luma' && a<.02) v=0;
-      if(state.invert) v=1-v;
+      if(state.invert&&!source.generated) v=1-v;
       v=clamp((v-.5)*c+.5,0,1);
       v=clamp((v-cut)/(1-cut||1),0,1);
-      h[i]=v;
+      h[i]=source.generated?v*(data[p]/255*2-1):v;
     }
     var passes=Math.max(0,Math.round(state.soft/4));
     if(passes){
@@ -1021,7 +1131,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     }
     if(state.bevel){
       var b=state.bevel/100;
-      for(var j=0;j<len;j++) h[j]=Math.pow(h[j],mix(1.9,.65,b));
+      for(var j=0;j<len;j++) h[j]=Math.sign(h[j])*Math.pow(Math.abs(h[j]),mix(1.9,.65,b));
     }
     source.heightCache=h;
     if(source===sourceAt(0)) heightCache=h;
@@ -1055,7 +1165,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     if(state.composition==='mosaic'&&state.canvasRatio==='free') return 4/3;
     if(state.composition==='pattern'&&state.canvasRatio==='free') return 1;
     if(state.canvasRatio!=='free') return +state.canvasRatio;
-    if(state.inputMode==='type'&&srcCanvas.width&&srcCanvas.height)return srcCanvas.width/srcCanvas.height;
+    if(state.inputMode==='type')return 1;
     return image.naturalWidth&&image.naturalHeight?image.naturalWidth/image.naturalHeight:1;
   }
   function artboardRect(target){
@@ -1064,6 +1174,10 @@ body.pattern-mode .btn.pattern-action{display:flex}
     var maxW=target.width-pad*2, maxH=target.height-pad*2, w=maxW, h=w/ratio;
     if(h>maxH){h=maxH;w=h*ratio}
     return {x:Math.round((target.width-w)/2),y:Math.round((target.height-h)/2),w:Math.round(w),h:Math.round(h)};
+  }
+  function typeSourceFrame(board,source){
+    var unit=Math.min(board.w,board.h)*.78*state.reliefScale/100/1000,b=source.typeBounds;
+    return {x:board.x+board.w/2+board.w*state.reliefX/100+(b.x-500)*unit,y:board.y+board.h/2+board.h*state.reliefY/100+(b.y-500)*unit,w:b.w*unit,h:b.h*unit,unit:unit};
   }
   function drawRelief(source, ctx, frame, scale, mode){
     if(!sourceReady(source)) return null;
@@ -1087,8 +1201,14 @@ body.pattern-mode .btn.pattern-action{display:flex}
       x=clamp(x,Math.round(frame.x),Math.round(frame.x+frame.w-w));
       y=clamp(y,Math.round(frame.y),Math.round(frame.y+frame.h-h));
     }
+    if(source.generated&&source.typeBounds&&mode&&mode.offset){
+      var placed=typeSourceFrame(frame,source);x=placed.x;y=placed.y;w=placed.w;h=placed.h;
+    }
+    var viewX=mode&&mode.clip?Math.max(x,frame.x):x,viewY=mode&&mode.clip?Math.max(y,frame.y):y;
+    var viewW=mode&&mode.clip?Math.min(x+w,frame.x+frame.w)-viewX:w,viewH=mode&&mode.clip?Math.min(y+h,frame.y+frame.h)-viewY:h;
+    if(viewW<=0||viewH<=0)return {x:x,y:y,w:w,h:h};
     var renderScale=mode&&mode.renderCap?Math.min(1,mode.renderCap/Math.max(w,h)):1;
-    var renderW=Math.max(2,Math.round(w*renderScale)), renderH=Math.max(2,Math.round(h*renderScale));
+    var renderW=Math.max(2,Math.round(viewW*renderScale)), renderH=Math.max(2,Math.round(viewH*renderScale));
     var off=document.createElement('canvas'); off.width=renderW; off.height=renderH;
     var octx=off.getContext('2d',{willReadFrequently:true});
     var heights=sampleHeight(source), mask=source.blendMask, hw=source.canvas.width, hh=source.canvas.height;
@@ -1097,68 +1217,93 @@ body.pattern-mode .btn.pattern-action{display:flex}
     var angle=state.angle*Math.PI/180, z=.12+state.lightHeight/46;
     var lx=Math.cos(angle), ly=Math.sin(angle), inv=1/Math.sqrt(lx*lx+ly*ly+z*z); lx*=inv; ly*=inv; var lz=z*inv;
     var strength=.8+state.height/10, ambient=state.ambient/100, rough=state.rough/100, specPower=mix(12,90,1-rough);
+    var mappedPaint=mappedSurfaceShader(ctx,surface);
+    var cavityStep=Math.max(1,Math.round(Math.min(hw,hh)*.004));
+    var textBounds=source.generated&&source.typeBounds, textDensity=textBounds?hw/textBounds.w:1;
+
     var toxicMetal=state.material==='toxic';
     var reflectiveMetal=state.material==='silver'||state.material==='gold'||state.material==='chrome'||toxicMetal;
     var reflectionSize=state.reflectionScale/100, reflectionVariation=state.reflectionTexture/100, reflectionFrequency=mix(10.5,1.25,reflectionSize);
     var reflectionAngle=state.reflectionRotation*Math.PI/180, reflectionCos=Math.cos(reflectionAngle), reflectionSin=Math.sin(reflectionAngle);
     for(var py=0;py<renderH;py++){
-      var sourceY=py/(renderH-1)*(hh-1), y0=Math.floor(sourceY), y1=Math.min(hh-1,y0+1), ty=sourceY-y0;
+      var sourceY=clamp((viewY-y+py/(renderH-1)*viewH)/h,0,1)*(hh-1), y0=Math.floor(sourceY), y1=Math.min(hh-1,y0+1), ty=sourceY-y0;
+      var textRow=textBounds?source.typeRects.map(function(rect,index){return {rect:rect,index:index}}).filter(function(item){var yy=textBounds.y+sourceY/textDensity;return yy>=item.rect.y&&yy<=item.rect.y+item.rect.h}):[];
       for(var px=0;px<renderW;px++){
-      var sourceX=px/(renderW-1)*(hw-1), x0=Math.floor(sourceX), x1=Math.min(hw-1,x0+1), tx=sourceX-x0;
+      var sourceX=clamp((viewX-x+px/(renderW-1)*viewW)/w,0,1)*(hw-1), x0=Math.floor(sourceX), x1=Math.min(hw-1,x0+1), tx=sourceX-x0;
       var i00=y0*hw+x0, i10=y0*hw+x1, i01=y1*hw+x0, i11=y1*hw+x1;
+      var typeDepth=1,localStep=cavityStep;
+      if(textBounds){
+        var logicalX=textBounds.x+sourceX/textDensity;
+        for(var ti=textRow.length-1;ti>=0;ti--){var item=textRow[ti];if(logicalX>=item.rect.x&&logicalX<=item.rect.x+item.rect.w){
+          var sizeFactor=Math.min(1,source.typeSizes[item.index]/120);
+          typeDepth=Math.sqrt(sizeFactor);localStep=Math.max(1,Math.round(textDensity*4*sizeFactor));break;
+        }}
+      }
       var h00=heights[i00], h10=heights[i10], h01=heights[i01], h11=heights[i11];
       var topHeight=mix(h00,h10,tx), bottomHeight=mix(h01,h11,tx), relief=mix(topHeight,bottomHeight,ty);
       var gradientX=mix(h10-h00,h11-h01,ty), gradientY=mix(h01-h00,h11-h10,tx);
-      var nx=-gradientX*strength*2, ny=-gradientY*strength*2, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
-      var diff=Math.max(0,nx*lx+ny*ly+nz*lz);
-      var edge=Math.min(1,(Math.abs(gradientX)+Math.abs(gradientY))*strength*2);
-      var spec=Math.pow(Math.max(0,diff),specPower)*(state.shine/100)*(0.45+edge*.75);
-      var shade=ambient+diff*(1-ambient), grain=(noise(px*.17,py*.17)-.5)*(state.grain/100)*34;
-      var shadow=(1-diff)*edge*48*(state.height/100);
-      var metalReflect=0, metalEdge=0, brushed=0, toxicFlow=0, toxicRim=0, toxicPit=0, chromeCurve=0;
-      if(reflectiveMetal){
-        var ux=px/Math.max(1,renderW), uy=py/Math.max(1,renderH);
-        var centeredUx=ux-.5, centeredUy=uy-.5, reflectUx=centeredUx*reflectionCos-centeredUy*reflectionSin+.5, reflectUy=centeredUx*reflectionSin+centeredUy*reflectionCos+.5;
-        var centeredPx=px-renderW*.5, centeredPy=py-renderH*.5, reflectPx=centeredPx*reflectionCos-centeredPy*reflectionSin, reflectPy=centeredPx*reflectionSin+centeredPy*reflectionCos;
-        var normalWarp=mix(.75,2.5,reflectionVariation), bandA=(Math.sin((reflectUy*reflectionFrequency+nx*normalWarp+state.angle*.009)*Math.PI*2)+1)*.5;
-        var bandB=(Math.sin((reflectUx*reflectionFrequency*.46-reflectUy*reflectionFrequency*.27+ny*mix(.8,2.8,reflectionVariation))*Math.PI*2)+1)*.5;
-        metalEdge=smoothstep(.08,.95,edge+Math.abs(nx)*.62+Math.abs(ny)*.62);
-        brushed=(noise(reflectPx*.055*mix(.65,1.7,reflectionVariation),reflectPy*.95*mix(.55,1.25,reflectionVariation))-.5)*mix(22,4,rough)*mix(.35,1,reflectionVariation);
-        metalReflect=clamp(bandA*mix(.7,.44,reflectionVariation)+bandB*mix(.08,.3,reflectionVariation)+metalEdge*.42+spec*.55,0,1)*(1-rough*.55);
-        if(toxicMetal){
-          var flowScale=mix(2.2,6.4,reflectionVariation), curveA=(Math.sin((reflectUy*reflectionFrequency*1.38+Math.sin(reflectUx*reflectionFrequency*.8+ny*2.2)*.85+nx*2.8+relief*1.9)*Math.PI*2)+1)*.5;
-          var curveB=(Math.sin((reflectUx*reflectionFrequency*.76+Math.cos(reflectUy*reflectionFrequency*.92+nx*2.6)*.75-ny*3.2)*Math.PI*2)+1)*.5;
-          toxicFlow=fbm(reflectUx*flowScale+ny*1.8+relief*.7,reflectUy*flowScale*1.22-nx*1.6,4);
-          toxicPit=smoothstep(.55,.95,fbm(reflectUx*flowScale*1.85+relief*1.1,reflectUy*flowScale*1.35+nx*1.5,3))*(1-metalEdge*.62);
-          toxicRim=smoothstep(.05,.82,edge+Math.abs(nx)*1.05+Math.abs(ny)*.88);
-          chromeCurve=clamp(curveA*.48+curveB*.34+toxicFlow*.22,0,1);
-          metalReflect=clamp(metalReflect*.42+chromeCurve*.58+toxicRim*.34,0,1);
-          brushed=(noise(reflectPx*.045,reflectPy*.38)-.5)*mix(9,2,rough);
-        }
-      }
-      var p=(py*renderW+px)*4;
-      for(var k=0;k<3;k++){
-        var mat=mode&&mode.surfaceBlend?mix(surface[k],base[k],relief*.42):mix(bg[k],base[k],.6+relief*.4);
-        var highlight=state.material==='gold'?[186,128,42][k]:state.material==='chrome'?230:toxicMetal?[198,230,192][k]:138;
-        var glow=state.material==='gold'?Math.pow(Math.max(0,nz*.34+diff*.86),mix(2.6,.9,edge))*[28,18,3][k]:0;
-        var value=mat*shade+spec*highlight+glow+grain-shadow;
+      var edge=Math.min(1,(Math.abs(gradientX)+Math.abs(gradientY))*strength*2),p=(py*renderW+px)*4;
+      if(!mappedPaint){
+        var nx=-gradientX*strength*2*typeDepth, ny=-gradientY*strength*2*typeDepth, nz=1, ni=1/Math.sqrt(nx*nx+ny*ny+nz*nz); nx*=ni; ny*=ni; nz*=ni;
+        var diff=Math.max(0,nx*lx+ny*ly+nz*lz);
+        var spec=Math.pow(Math.max(0,diff),specPower)*(state.shine/100)*(0.45+edge*.75);
+        var shade=ambient+diff*(1-ambient), grain=(noise(px*.17,py*.17)-.5)*(state.grain/100)*34;
+        var shadow=(1-diff)*edge*48*(state.height/100);
+        var metalReflect=0, metalEdge=0, brushed=0, toxicFlow=0, toxicRim=0, toxicPit=0, chromeCurve=0;
         if(reflectiveMetal){
-          var bright=state.material==='gold'?[255,218,126][k]:state.material==='chrome'?[248,252,255][k]:toxicMetal?[214,232,207][k]:[226,232,235][k];
-          var dark=state.material==='gold'?[95,59,12][k]:state.material==='chrome'?[38,43,48][k]:toxicMetal?[8,14,10][k]:[66,70,74][k];
-          var reflected=mix(dark,bright,metalReflect);
-          value=mix(value,reflected,.34+metalEdge*.2)+brushed;
+          var ux=px/Math.max(1,renderW), uy=py/Math.max(1,renderH);
+          var centeredUx=ux-.5, centeredUy=uy-.5, reflectUx=centeredUx*reflectionCos-centeredUy*reflectionSin+.5, reflectUy=centeredUx*reflectionSin+centeredUy*reflectionCos+.5;
+          var centeredPx=px-renderW*.5, centeredPy=py-renderH*.5, reflectPx=centeredPx*reflectionCos-centeredPy*reflectionSin, reflectPy=centeredPx*reflectionSin+centeredPy*reflectionCos;
+          var normalWarp=mix(.75,2.5,reflectionVariation), bandA=(Math.sin((reflectUy*reflectionFrequency+nx*normalWarp+state.angle*.009)*Math.PI*2)+1)*.5;
+          var bandB=(Math.sin((reflectUx*reflectionFrequency*.46-reflectUy*reflectionFrequency*.27+ny*mix(.8,2.8,reflectionVariation))*Math.PI*2)+1)*.5;
+          metalEdge=smoothstep(.08,.95,edge+Math.abs(nx)*.62+Math.abs(ny)*.62);
+          brushed=(noise(reflectPx*.055*mix(.65,1.7,reflectionVariation),reflectPy*.95*mix(.55,1.25,reflectionVariation))-.5)*mix(22,4,rough)*mix(.35,1,reflectionVariation);
+          metalReflect=clamp(bandA*mix(.7,.44,reflectionVariation)+bandB*mix(.08,.3,reflectionVariation)+metalEdge*.42+spec*.55,0,1)*(1-rough*.55);
           if(toxicMetal){
-            var tint=[142,188,133][k], shadowGreen=[21,35,22][k], black=[1,3,2][k];
-            var liquid=mix(shadowGreen,tint,smoothstep(.2,.92,metalReflect+chromeCurve*.22));
-            var sink=mix(liquid,black,toxicPit*.44);
-            value=mix(value,sink,.48+.1*toxicRim);
-            value+=tint*(toxicRim*.12+spec*.18)+[58,92,52][k]*Math.pow(Math.max(0,diff),2.0)*.13;
+            var flowScale=mix(2.2,6.4,reflectionVariation), curveA=(Math.sin((reflectUy*reflectionFrequency*1.38+Math.sin(reflectUx*reflectionFrequency*.8+ny*2.2)*.85+nx*2.8+relief*1.9)*Math.PI*2)+1)*.5;
+            var curveB=(Math.sin((reflectUx*reflectionFrequency*.76+Math.cos(reflectUy*reflectionFrequency*.92+nx*2.6)*.75-ny*3.2)*Math.PI*2)+1)*.5;
+            toxicFlow=fbm(reflectUx*flowScale+ny*1.8+relief*.7,reflectUy*flowScale*1.22-nx*1.6,4);
+            toxicPit=smoothstep(.55,.95,fbm(reflectUx*flowScale*1.85+relief*1.1,reflectUy*flowScale*1.35+nx*1.5,3))*(1-metalEdge*.62);
+            toxicRim=smoothstep(.05,.82,edge+Math.abs(nx)*1.05+Math.abs(ny)*.88);
+            chromeCurve=clamp(curveA*.48+curveB*.34+toxicFlow*.22,0,1);
+            metalReflect=clamp(metalReflect*.42+chromeCurve*.58+toxicRim*.34,0,1);
+            brushed=(noise(reflectPx*.045,reflectPy*.38)-.5)*mix(9,2,rough);
           }
         }
-        pix[p+k]=clamp(value,0,255);
+        for(var k=0;k<3;k++){
+          var mat=mode&&mode.surfaceBlend?mix(surface[k],base[k],relief*.42):mix(bg[k],base[k],.6+relief*.4);
+          var highlight=state.material==='gold'?[186,128,42][k]:state.material==='chrome'?230:toxicMetal?[198,230,192][k]:138;
+          var glow=state.material==='gold'?Math.pow(Math.max(0,nz*.34+diff*.86),mix(2.6,.9,edge))*[28,18,3][k]:0;
+          var value=mat*shade+spec*highlight+glow+grain-shadow;
+          if(reflectiveMetal){
+            var bright=state.material==='gold'?[255,218,126][k]:state.material==='chrome'?[248,252,255][k]:toxicMetal?[214,232,207][k]:[226,232,235][k];
+            var dark=state.material==='gold'?[95,59,12][k]:state.material==='chrome'?[38,43,48][k]:toxicMetal?[8,14,10][k]:[66,70,74][k];
+            var reflected=mix(dark,bright,metalReflect);
+            value=mix(value,reflected,.34+metalEdge*.2)+brushed;
+            if(toxicMetal){
+              var tint=[142,188,133][k], shadowGreen=[21,35,22][k], black=[1,3,2][k];
+              var liquid=mix(shadowGreen,tint,smoothstep(.2,.92,metalReflect+chromeCurve*.22));
+              var sink=mix(liquid,black,toxicPit*.44);
+              value=mix(value,sink,.48+.1*toxicRim);
+              value+=tint*(toxicRim*.12+spec*.18)+[58,92,52][k]*Math.pow(Math.max(0,diff),2.0)*.13;
+            }
+          }
+          pix[p+k]=clamp(value,0,255);
+        }
+      }
+      var cavity=0;
+      if(mappedPaint){
+        var leftH=heights[y0*hw+Math.max(0,x0-localStep)],rightH=heights[y0*hw+Math.min(hw-1,x0+localStep)];
+        var topH=heights[Math.max(0,y0-localStep)*hw+x0],bottomH=heights[Math.min(hh-1,y0+localStep)*hw+x0];
+        cavity=clamp(((leftH+rightH+topH+bottomH)*.25-relief)*5,0,1);
+        var mappedEdge=Math.min(1,Math.abs(rightH-leftH)+Math.abs(bottomH-topH));
+        edge=Math.max(edge,mappedEdge);
+        var mapped=mappedPaint(viewX+(px+.5)/renderW*viewW,viewY+(py+.5)/renderH*viewH,(leftH-rightH)*strength*.42*typeDepth,(topH-bottomH)*strength*.42*typeDepth,cavity,Math.abs(relief));
+        var lift=relief*(state.texture==='stoneScan'?5:3);
+        pix[p]=mapped[0]+lift;pix[p+1]=mapped[1]+lift;pix[p+2]=mapped[2]+lift;
       }
       var blend=mask&&heightSourceFor(source)==='luma'?mix(mix(mask[i00],mask[i10],tx),mix(mask[i01],mask[i11],tx),ty):1;
-      pix[p+3]=mode&&mode.surfaceBlend?clamp((relief*1.18+edge*.9)*blend*255,0,255):255;
+      pix[p+3]=mode&&mode.surfaceBlend?clamp((Math.abs(relief)*1.18+edge*.9+cavity*state.weathering/100)*blend*255,0,255):255;
     }}
     octx.putImageData(img,0,0);
     if(mode&&mode.clip){
@@ -1168,7 +1313,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       ctx.clip();
     }
     ctx.imageSmoothingEnabled=true;
-    ctx.drawImage(off,x,y,w,h);
+    ctx.drawImage(off,viewX,viewY,viewW,viewH);
     if(mode&&mode.clip) ctx.restore();
     return {x:x,y:y,w:w,h:h};
   }
@@ -1180,16 +1325,17 @@ body.pattern-mode .btn.pattern-action{display:flex}
     }
     ctx.globalAlpha=1;
   }
-  function applyFinish(ctx,target,renderCap){
+  function applyFinish(ctx,target,renderCap,finishRect){
     var sat=state.finishSaturation/100, con=state.finishContrast/100;
     var sharp=state.finishSharpness/100, clarity=state.finishClarity/100, hi=state.finishHighlight/100, bloom=state.finishBloom/100, warm=state.finishWarmth/100;
     if(Math.abs(sat-1)<.01&&Math.abs(con-1)<.01&&!sharp&&!clarity&&!hi&&!bloom&&Math.abs(warm)<.01) return;
     var w=target.width,h=target.height;
+    finishRect=finishRect||artboardRect(target);
     if(renderCap&&Math.max(w,h)>renderCap){
       var scale=renderCap/Math.max(w,h), reduced=document.createElement('canvas'), reducedCtx=reduced.getContext('2d');
       reduced.width=Math.max(2,Math.round(w*scale));reduced.height=Math.max(2,Math.round(h*scale));
       reducedCtx.drawImage(target,0,0,reduced.width,reduced.height);
-      applyFinish(reducedCtx,reduced);
+      applyFinish(reducedCtx,reduced,0,{x:finishRect.x*scale,y:finishRect.y*scale,w:finishRect.w*scale,h:finishRect.h*scale});
       ctx.clearRect(0,0,w,h);ctx.imageSmoothingEnabled=true;ctx.drawImage(reduced,0,0,w,h);
       return;
     }
@@ -1203,14 +1349,16 @@ body.pattern-mode .btn.pattern-action{display:flex}
       blurCtx.drawImage(base,0,0);
       blurData=blurCtx.getImageData(0,0,w,h).data;
     }
+    var highlights=hi||bloom?HighlightFinish.extract(ctx,finishRect,hi):null;
     var amount=sharp*1.25+clarity*.72;
     for(var i=0;i<d.length;i+=4){
       var r=d[i],g=d[i+1],b=d[i+2],lum=.299*r+.587*g+.114*b;
       r=lum+(r-lum)*sat;g=lum+(g-lum)*sat;b=lum+(b-lum)*sat;
       r=(r-128)*con+128;g=(g-128)*con+128;b=(b-128)*con+128;
       if(hi){
-        var hmask=clamp((lum-132)/116,0,1)*hi;
-        r=mix(r,255,hmask*.42);g=mix(g,222,hmask*.34);b=mix(b,132,hmask*.18);
+        var hmask=HighlightFinish.sample(highlights,(i/4)%w,Math.floor(i/4/w));
+        var lift=1-Math.exp(-hmask*hi*3.8);
+        r=mix(r,255,lift);g=mix(g,255,lift);b=mix(b,255,lift);
       }
       if(warm){r+=warm*18;g+=warm*8;b-=warm*14}
       if(blurData){
@@ -1220,23 +1368,9 @@ body.pattern-mode .btn.pattern-action{display:flex}
       d[i]=clamp(r,0,255);d[i+1]=clamp(g,0,255);d[i+2]=clamp(b,0,255);
     }
     ctx.putImageData(img,0,0);
-    if(bloom){
-      var glow=document.createElement('canvas'), gctx=glow.getContext('2d');
-      glow.width=w;glow.height=h;
-      var glowImg=ctx.getImageData(0,0,w,h), gd=glowImg.data;
-      for(var j=0;j<gd.length;j+=4){
-        var l=.299*gd[j]+.587*gd[j+1]+.114*gd[j+2], m=clamp((l-150)/105,0,1);
-        gd[j]=gd[j]*m;gd[j+1]=gd[j+1]*m;gd[j+2]=gd[j+2]*m;gd[j+3]=gd[j+3]*m*bloom*.72;
-      }
-      gctx.putImageData(glowImg,0,0);
-      ctx.save();
-      ctx.globalCompositeOperation='screen';
-      ctx.globalAlpha=.35+bloom*.55;
-      ctx.filter='blur('+Math.round(Math.min(w,h)*(.006+bloom*.012))+'px)';
-      ctx.drawImage(glow,0,0);
-      ctx.restore();
-    }
+    if(highlights)HighlightFinish.draw(ctx,highlights,hi,bloom,['silver','chrome','toxic','gold'].indexOf(state.material)>=0);
   }
+
   function smoothNoise(x,y){
     var xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
     xf=xf*xf*(3-2*xf); yf=yf*yf*(3-2*yf);
@@ -1317,18 +1451,45 @@ body.pattern-mode .btn.pattern-action{display:flex}
     ctx.drawImage(out,board.x,board.y,board.w,board.h);
   }
   function materialTexture(ctx, board){
-    if(state.texture==='none') return;
+    if(state.texture==='none'||MaterialSurfaces.has(state.texture)) return;
     drawProceduralTexture(ctx,board,state.texture,state.textureStrength/100);
   }
   function surfaceColor(){
     var base=hex(state.base), bg=hex(state.back);
     return [mix(bg[0],base[0],.72),mix(bg[1],base[1],.72),mix(bg[2],base[2],.72)];
   }
+  function mappedSurfaceShader(ctx,surface){
+    var board=artboardRect(ctx.canvas);
+    if(state.composition==='pattern'){
+      var metrics=ctx.canvas.materialTile||patternMetrics(board.w,board.h);
+      board.tileW=metrics.unitW;board.tileH=metrics.unitH;
+    }
+    return MaterialSurfaces.shader(state,board,surface);
+  }
+  var surfacePreviewCache={key:'',canvas:null};
   function panelSurface(ctx, rect){
     var base=hex(state.base), surface=surfaceColor();
     ctx.save();
     ctx.fillStyle='rgb('+[surface[0]|0,surface[1]|0,surface[2]|0].join(',')+')';
     ctx.fillRect(rect.x,rect.y,rect.w,rect.h);
+    var paint=mappedSurfaceShader(ctx,surface);
+    if(paint){
+      var cap=ctx.canvas===preview?(previewFast?300:1000):Math.max(rect.w,rect.h);
+      var factor=Math.min(1,cap/Math.max(rect.w,rect.h));
+      var cacheKey='';
+      if(ctx.canvas===preview){
+        cacheKey=[rect.x,rect.y,rect.w,rect.h,cap,state.material,state.texture,state.base,state.back,state.textureStrength,state.textureScale,state.textureDetail,state.weathering,state.surfaceSheen,state.angle,state.lightHeight,state.ambient,state.shine,state.rough,state.reflectionScale,state.reflectionTexture,state.reflectionRotation,state.composition,state.patternSize,state.patternGap,state.patternLayout,sourceAt(0).canvas.width,sourceAt(0).canvas.height].join('|');
+        if(surfacePreviewCache.key===cacheKey){ctx.drawImage(surfacePreviewCache.canvas,rect.x,rect.y,rect.w,rect.h);ctx.restore();return}
+      }
+      var tile=document.createElement('canvas');tile.width=Math.max(2,Math.round(rect.w*factor));tile.height=Math.max(2,Math.round(rect.h*factor));
+      var tc=tile.getContext('2d'),pixels=tc.createImageData(tile.width,tile.height);
+      for(var y=0;y<tile.height;y++)for(var x=0;x<tile.width;x++){
+        var rgb=paint(rect.x+(x+.5)/tile.width*rect.w,rect.y+(y+.5)/tile.height*rect.h,0,0,0),i=(y*tile.width+x)*4;
+        pixels.data[i]=rgb[0];pixels.data[i+1]=rgb[1];pixels.data[i+2]=rgb[2];pixels.data[i+3]=255;
+      }
+      tc.putImageData(pixels,0,0);ctx.drawImage(tile,rect.x,rect.y,rect.w,rect.h);
+      if(cacheKey){surfacePreviewCache.key=cacheKey;surfacePreviewCache.canvas=tile}
+    }
     ctx.restore();
   }
   function drawPanelAdd(ctx, rect){
@@ -1358,7 +1519,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       h+=Math.exp(-lip*lip)*.18-Math.exp(-core*core)*.82;
     }
     h=clamp(h,-1,1);
-    return state.invert?-h:h;
+    return state.inputMode!=='type'&&state.invert?-h:h;
   }
   function drawMosaicSeams(ctx,board,scale,renderCap){
     if(!mosaicSeams.length) return;
@@ -1423,7 +1584,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       };
       var source=sourceAt(index);
       if(target===preview) lastMosaicRects.push({index:index,x:rect.x,y:rect.y,w:rect.w,h:rect.h});
-      if(source.userLoaded) drawRelief(source,ctx,rect,scale,{panel:true,clip:true,surfaceBlend:true,renderCap:target===preview?520:0});
+      if(source.userLoaded) drawRelief(source,ctx,rect,scale,{panel:true,clip:true,surfaceBlend:true,renderCap:target===preview?(previewFast?300:520):0});
       else if(target===preview) drawPanelAdd(ctx,rect);
     });
   }
@@ -1462,7 +1623,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       minY=Math.max(minY,Math.floor(clip.y));maxY=Math.min(maxY,Math.ceil(clip.y+clip.h)-1);
     }
     if(minX>maxX||minY>maxY)return;
-    var base=state.invert?1:0, depressed=state.invert, mx=mirrorX||1, my=mirrorY||1;
+    var signed=sourceAt(0).signedHeight,base=!signed&&state.invert?1:0, depressed=!signed&&state.invert, mx=mirrorX||1, my=mirrorY||1;
     for(var y=minY;y<=maxY;y++) for(var x=minX;x<=maxX;x++){
       var dx=x+.5-cx, dy=y+.5-cy;
       var localX=(cos*dx+sin*dy)*mx, localY=(-sin*dx+cos*dy)*my;
@@ -1476,14 +1637,14 @@ body.pattern-mode .btn.pattern-action{display:flex}
       var edgeDistance=Math.min(u*motifW,(1-u)*motifW,v*motifH,(1-v)*motifH);
       if(edgeDistance<.5)value=mix(base,value,clamp(edgeDistance+.5,0,1));
       var index=y*width+x;
-      target[index]=depressed?Math.min(target[index],value):Math.max(target[index],value);
+      target[index]=signed?(Math.abs(value)>Math.abs(target[index])?value:target[index]):(depressed?Math.min(target[index],value):Math.max(target[index],value));
     }
   }
   function buildPatternHeight(width,height,metrics){
     metrics=metrics||patternMetrics(width,height);
     var source=sourceAt(0), sourceHeights=sampleHeight(source), sourceW=source.canvas.width, sourceH=source.canvas.height;
     var tileWidth=Math.max(4,Math.ceil(metrics.unitW)), tileHeight=Math.max(4,Math.ceil(metrics.unitH));
-    var tile=new Float32Array(tileWidth*tileHeight), base=state.invert?1:0;
+    var tile=new Float32Array(tileWidth*tileHeight), base=!source.signedHeight&&state.invert?1:0;
     if(base)tile.fill(base);
     var bases=patternBases(metrics), angle=state.patternRotation*Math.PI/180, cos=Math.cos(angle), sin=Math.sin(angle);
     var extentX=Math.abs(cos)*metrics.motifW*.5+Math.abs(sin)*metrics.motifH*.5;
@@ -1516,14 +1677,14 @@ body.pattern-mode .btn.pattern-action{display:flex}
     }
     if(patternSource.canvas.width!==width||patternSource.canvas.height!==height){patternSource.canvas.width=width;patternSource.canvas.height=height}
     patternSource.ctx=patternSource.canvas.getContext('2d',{willReadFrequently:true});
-    patternSource.heightCache=field.heights;patternSource.blendMask=null;
+    patternSource.heightCache=field.heights;patternSource.blendMask=null;patternSource.signedHeight=sourceAt(0).signedHeight;
     patternCache.key=key;patternCache.metrics=field.metrics;
     return patternSource;
   }
   function drawPattern(ctx,target,board,scale){
     panelSurface(ctx,board);
-    var previewCap=target===preview&&previewFast?560:0;
-    var sourceEdge=target===preview?(previewFast?560:clamp(Math.round(Math.max(board.w,board.h)),720,1400)):Math.min(2400,Math.max(1200,Math.round(Math.max(board.w,board.h))));
+    var previewCap=target===preview&&previewFast?320:0;
+    var sourceEdge=target===preview?(previewFast?320:clamp(Math.round(Math.max(board.w,board.h)),720,1400)):Math.min(2400,Math.max(1200,Math.round(Math.max(board.w,board.h))));
     return drawRelief(buildPatternSource(board,sourceEdge),ctx,board,scale,{fill:true,surfaceBlend:true,renderCap:previewCap});
   }
   function drawCanvas(target, scale, options){
@@ -1542,8 +1703,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
       var relief=drawPattern(ctx,target,board,scale);
     }else{
       panelSurface(ctx,board);
-      var singleCap=target===preview?(state.inputMode==='type'?(previewFast?620:0):(previewFast?620:840)):0;
-      var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,contain:state.inputMode==='type',surfaceBlend:true,renderCap:singleCap});
+      var singleCap=target===preview?(state.inputMode==='type'?(previewFast?320:0):(previewFast?320:840)):0;
+      var relief=drawRelief(sourceAt(0),ctx,board,scale,{offset:true,clip:true,surfaceBlend:true,renderCap:singleCap});
       if(relief&&!options.skipOverlay) drawOverlay(ctx,target,relief.w,relief.h,relief.x,relief.y);
     }
     if(state.composition!=='single'&&!options.skipOverlay) drawOverlay(ctx,target,board.w,board.h,board.x,board.y);
@@ -1567,12 +1728,12 @@ body.pattern-mode .btn.pattern-action{display:flex}
       lastReliefFrame={x:x,y:y,w:w,h:h};
     }
   }
-  function render(){renderQueued=false;drawCanvas(preview,1);positionDot()}
+  function render(){renderQueued=false;drawCanvas(preview,1);drawTypeGuides();positionDot()}
   function schedule(interactive){
     if(interactive){
       previewFast=true;
       clearTimeout(previewRefineTimer);
-      previewRefineTimer=setTimeout(function(){previewFast=false;schedule()},180);
+      previewRefineTimer=setTimeout(function(){previewFast=false;schedule()},240);
     }
     if(renderQueued)return;
     renderQueued=true;requestAnimationFrame(render);
@@ -1658,6 +1819,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     setExportBusy(true,size);
     await nextFrame();
     try{
+      await MaterialSurfaces.ready;
+      await prepareTypeExport();
       var out=document.createElement('canvas');
       out.width=size[0]; out.height=size[1];
       drawCanvas(out,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)));
@@ -1689,9 +1852,12 @@ body.pattern-mode .btn.pattern-action{display:flex}
     var tileSource={image:image,canvas:tile,ctx:tile.getContext('2d',{willReadFrequently:true}),heightCache:buildPatternHeight(tile.width,tile.height,metrics),blendMask:null,name:'pattern tile',generated:true};
     var out=document.createElement('canvas'), board={x:0,y:0,w:tile.width,h:tile.height};
     out.width=tile.width;out.height=tile.height;
+    out.materialTile={unitW:tile.width,unitH:tile.height};
     setExportBusy(true,[out.width,out.height],'patternTile');
     await nextFrame();
     try{
+      await MaterialSurfaces.ready;
+      await prepareTypeExport();
       var ctx=out.getContext('2d');
       ctx.fillStyle=state.back;ctx.fillRect(0,0,out.width,out.height);
       panelSurface(ctx,board);
@@ -1733,12 +1899,15 @@ body.pattern-mode .btn.pattern-action{display:flex}
       x=clamp(x,Math.round(frame.x),Math.round(frame.x+frame.w-w));
       y=clamp(y,Math.round(frame.y),Math.round(frame.y+frame.h-h));
     }
+    if(source.generated&&source.typeBounds&&mode&&mode.offset){
+      var placed=typeSourceFrame(frame,source);x=placed.x;y=placed.y;w=placed.w;h=placed.h;
+    }
     var heights=sampleHeight(source), hw=source.canvas.width, hh=source.canvas.height;
     var map=document.createElement('canvas'), mapCtx=map.getContext('2d');
     map.width=hw; map.height=hh;
     var img=mapCtx.createImageData(hw,hh), data=img.data;
     for(var i=0;i<hw*hh;i++){
-      var v=Math.round(clamp(heights[i],0,1)*255), p=i*4;
+      var v=Math.round(clamp(source.signedHeight?.5+heights[i]*.5:heights[i],0,1)*255), p=i*4;
       data[p]=v; data[p+1]=v; data[p+2]=v; data[p+3]=255;
     }
     mapCtx.putImageData(img,0,0);
@@ -1757,7 +1926,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     if(!sourceReady(sourceAt(0))) return 0;
     scale=scale||1;
     var ctx=target.getContext('2d'), board=artboardRect(target), drawn=0;
-    ctx.fillStyle='#000';
+    ctx.fillStyle=sourceAt(0).signedHeight?'#808080':'#000';
     ctx.fillRect(0,0,target.width,target.height);
     if(state.composition==='mosaic'){
       if(mosaicLayout.length!==state.mosaicCount) shuffleMosaic();
@@ -1772,7 +1941,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
       });
     }else if(state.composition==='pattern'&&drawHeightMapSource(buildPatternSource(board,Math.min(2400,Math.max(1200,Math.round(Math.max(board.w,board.h))))),ctx,board,scale,{fill:true})){
       drawn++;
-    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true,contain:state.inputMode==='type'})){
+    }else if(drawHeightMapSource(sourceAt(0),ctx,board,scale,{offset:true,clip:true})){
       drawn++;
     }
     return drawn;
@@ -1782,6 +1951,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     setExportBusy(true,size,'heightMap');
     await nextFrame();
     try{
+      await MaterialSurfaces.ready;
+      await prepareTypeExport();
       var out=document.createElement('canvas');
       out.width=size[0]; out.height=size[1];
       if(!drawHeightMapCanvas(out,Math.max(size[0]/Math.max(1,preview.width),size[1]/Math.max(1,preview.height)))) throw new Error('No relief source found.');
@@ -1804,7 +1975,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     var heights=sampleHeight(source), mask=source.blendMask, w=source.canvas.width, h=source.canvas.height;
     var minX=w,minY=h,maxX=-1,maxY=-1;
     for(var y=0;y<h;y++) for(var x=0;x<w;x++){
-      var i=y*w+x, active=Math.max(heights[i],mask?mask[i]:0);
+      var i=y*w+x, active=Math.max(Math.abs(heights[i]),mask?mask[i]:0);
       if(active>.025){if(x<minX)minX=x;if(y<minY)minY=y;if(x>maxX)maxX=x;if(y>maxY)maxY=y}
     }
     if(maxX<minX||maxY<minY) return null;
@@ -1819,7 +1990,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     canvas.width=w; canvas.height=h;
     var img=ctx.createImageData(w,h), data=img.data;
     for(var i=0;i<w*h;i++){
-      var a=smoothstep(.015,.16,Math.max(heights[i],mask?mask[i]:0));
+      var a=smoothstep(.015,.16,Math.max(Math.abs(heights[i]),mask?mask[i]:0));
       var p=i*4;
       data[p]=255; data[p+1]=255; data[p+2]=255; data[p+3]=Math.round(a*255);
     }
@@ -1831,6 +2002,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     setExportBusy(true,size,'subject');
     await nextFrame();
     try{
+      await MaterialSurfaces.ready;
+      await prepareTypeExport();
       if(state.composition!=='single'||!sourceReady(source)) throw new Error('Auto Subject requires a single loaded source.');
       var box=subjectBounds(source);
       if(!box) throw new Error('No active subject found.');
@@ -1925,7 +2098,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
   }
   function createMaterials(){
     var root=document.getElementById('materials');
-    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
+    Object.keys(materials).forEach(function(key){var m=materials[key],b=document.createElement('button');b.type='button';b.className='btn material';b.dataset.material=key;b.innerHTML='<span style="background:'+m.base+'"></span>'+(state.lang==='zh'&&m.zh?m.zh:m.name);b.onclick=function(){state.material=key;Object.assign(state,m);document.getElementById('base').value=state.base;document.getElementById('back').value=state.back;['height','grain','rough','shine','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','weathering','surfaceSheen'].forEach(function(id){document.getElementById(id).value=state[id]});clearHeightCaches();clearTextureCache();updateValues();schedule()};root.appendChild(b)});
   }
   function animateSweep(time){
     if(!state.sweep)return;
@@ -1990,11 +2163,12 @@ body.pattern-mode .btn.pattern-action{display:flex}
     for(var i=0;i<choices.length;i++) if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(choices[i])) return choices[i];
     return 'video/webm';
   }
-  function exportSweep(){
+  async function exportSweep(){
     if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){
       setStatus('This browser cannot export the sweep video yet.');
       return;
     }
+    try{await prepareTypeExport()}catch(error){console.error(error);setStatus(tr('exportFailed'));return}
     if(state.sweep)toggleSweep();
     var button=document.getElementById('exportSweep'), size=exportDimensions(), out=document.createElement('canvas');
     var startAngle=state.angle, baseAngle=state.angle, duration=state.sweepDuration*1000, chunks=[], mime=recorderType();
@@ -2021,7 +2195,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
     }
     requestAnimationFrame(frame);
   }
-  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','patternSize','patternGap','patternRotation','patternOffset','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(id.indexOf('pattern')===0)clearPatternCache();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule(true)})});
+  ['height','soft','contrast','threshold','bevel','angle','lightHeight','ambient','shine','sweepDuration','grain','rough','reflectionScale','reflectionTexture','reflectionRotation','textureStrength','textureScale','textureDetail','weathering','surfaceSheen','patternSize','patternGap','patternRotation','patternOffset','reliefScale','reliefX','reliefY','overlayOpacity','overlayScale','overlayX','overlayY','finishSaturation','finishContrast','finishSharpness','finishClarity','finishHighlight','finishBloom','finishWarmth'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){readState(id);if(['soft','contrast','threshold','bevel'].indexOf(id)>=0)clearHeightCaches();if(id.indexOf('pattern')===0)clearPatternCache();if(['angle','lightHeight','ambient','shine','grain','rough','textureStrength','textureScale','textureDetail','weathering','surfaceSheen'].indexOf(id)>=0)clearTextureCache();if(id.indexOf('finish')===0)state.finish='custom';if(id==='angle'&&state.sweep){sweepBase=state.angle}sweepStart=id==='sweepDuration'?0:sweepStart;updateValues();schedule(true)})});
   document.querySelectorAll('[data-finish]').forEach(function(b){b.addEventListener('click',function(){
     state.finish=b.dataset.finish;
     Object.assign(state,finishPresets[state.finish]||finishPresets.natural);
@@ -2032,16 +2206,25 @@ body.pattern-mode .btn.pattern-action{display:flex}
   document.getElementById('surfaceTexture').addEventListener('change',function(){
     state.texture=this.value;
     var presets={grainProc:{textureStrength:16,textureScale:6,textureDetail:48},spots:{textureStrength:34,textureScale:88,textureDetail:8},clouds:{textureStrength:42,textureScale:68,textureDetail:38},cells:{textureStrength:38,textureScale:54,textureDetail:46}};
+    Object.keys(materials).forEach(function(key){var m=materials[key];if(MaterialSurfaces.supports(m.texture)&&!presets[m.texture])presets[m.texture]={textureStrength:m.textureStrength,textureScale:m.textureScale,textureDetail:m.textureDetail,weathering:m.weathering,surfaceSheen:m.surfaceSheen}});
     if(presets[state.texture]){
       Object.assign(state,presets[state.texture]);
-      ['textureStrength','textureScale','textureDetail'].forEach(function(id){document.getElementById(id).value=state[id]});
+      ['textureStrength','textureScale','textureDetail','weathering','surfaceSheen'].forEach(function(id){document.getElementById(id).value=state[id]});
     }else if(state.texture!=='none'&&!state.textureStrength){
       state.textureStrength=42;document.getElementById('textureStrength').value=42;
     }
     clearTextureCache();updateValues();schedule();
   });
   document.querySelectorAll('[data-input-mode]').forEach(function(button){button.addEventListener('click',function(){setInputMode(button.dataset.inputMode)})});
-  document.getElementById('typeText').addEventListener('input',function(){state.typeText=this.value;requestTypeRender(true)});
+  document.getElementById('typeLayer').onchange=function(){saveTypeLayer();selectTypeLayer(+this.value)};
+  document.getElementById('addTypeLayer').onclick=function(){saveTypeLayer();typeLayers.push(Object.assign({},typeLayers[activeTypeLayer],{typeText:'新文字',size:80,x:50,y:65}));selectTypeLayer(typeLayers.length-1)};
+  document.getElementById('copyTypeLayer').onclick=function(){saveTypeLayer();var layer=typeLayers[activeTypeLayer];typeLayers.push(Object.assign({},layer,{y:Math.min(100,layer.y+10)}));selectTypeLayer(typeLayers.length-1)};
+  document.getElementById('deleteTypeLayer').onclick=function(){if(typeLayers.length<2)return;typeLayers.splice(activeTypeLayer,1);selectTypeLayer(Math.min(activeTypeLayer,typeLayers.length-1))};
+  [['layerSize','size'],['layerX','x'],['layerY','y']].forEach(function(pair){document.getElementById(pair[0]).oninput=function(){if(this.value===''||!this.checkValidity())return;typeLayers[activeTypeLayer][pair[1]]=+this.value;requestTypeRender(true)}});
+  var typeComposing=false;
+  document.getElementById('typeText').addEventListener('compositionstart',function(){typeComposing=true;clearTimeout(typeRefineTimer);typeRenderRevision++});
+  document.getElementById('typeText').addEventListener('compositionend',function(){typeComposing=false;state.typeText=this.value;requestTypeRender(true)});
+  document.getElementById('typeText').addEventListener('input',function(event){if(typeComposing||event.isComposing)return;state.typeText=this.value;requestTypeRender(true)});
   document.getElementById('typeFont').addEventListener('change',function(){state.typeFont=this.value;requestTypeRender(false)});
   document.getElementById('typeWeight').addEventListener('change',function(){state.typeWeight=this.value;requestTypeRender(false)});
   document.getElementById('typeTracking').addEventListener('input',function(){readState('typeTracking');updateValues();requestTypeRender(true)});
@@ -2049,7 +2232,7 @@ body.pattern-mode .btn.pattern-action{display:flex}
   document.querySelectorAll('[data-type-align]').forEach(function(button){button.addEventListener('click',function(){state.typeAlign=button.dataset.typeAlign;updateValues();requestTypeRender(false)})});
   document.getElementById('typeItalic').addEventListener('change',function(){readState('typeItalic');updateValues();requestTypeRender(false)});
   document.getElementById('typeFontFile').addEventListener('change',function(){importTypeFont(this.files[0])});
-  document.getElementById('invert').addEventListener('change',function(){readState('invert');clearHeightCaches();schedule()});
+  document.getElementById('invert').addEventListener('change',function(){readState('invert');if(state.inputMode==='type'){requestTypeRender(false)}else{clearHeightCaches();schedule()}});
   document.querySelectorAll('[data-source]').forEach(function(b){b.onclick=function(){state.source=b.dataset.source;imageHeightSource=state.source;clearHeightCaches();updateValues();schedule()}});
   document.querySelectorAll('[data-composition]').forEach(function(b){b.onclick=function(){
     state.composition=b.dataset.composition;
@@ -2080,8 +2263,47 @@ body.pattern-mode .btn.pattern-action{display:flex}
   stage.addEventListener('wheel',resizeAtPointer,{passive:false});
   stage.addEventListener('contextmenu',removeMosaicPanel);
   stage.addEventListener('pointerdown',startStageDrag);
-  stage.addEventListener('pointermove',function(e){if(mosaicDrag)moveMosaicPanel(e);else if(overlayDrag)moveOverlay(e);else if(e.buttons&&state.composition!=='mosaic')moveLight(e)});
+  stage.addEventListener('pointermove',function(e){if(typeDrag)moveTypeLayer(e);else if(mosaicDrag)moveMosaicPanel(e);else if(overlayDrag)moveOverlay(e);else if(e.buttons&&state.composition!=='mosaic')moveLight(e)});
   stage.addEventListener('pointerup',stopStageDrag);stage.addEventListener('pointercancel',stopStageDrag);
+  var typeDrag=null,typeSnap=[],typeGuidesVisible=false;
+  document.addEventListener('pointerdown',function(e){
+    if(state.inputMode!=='type'||state.composition!=='single')return;
+    var p=canvasPoint(e),board=artboardRect(preview);
+    if(p.x<board.x||p.x>board.x+board.w||p.y<board.y||p.y>board.y+board.h){
+      typeGuidesVisible=false;typeSnap=[];schedule();
+    }
+  },true);
+  function typeScreenRects(){
+    var source=sourceAt(0);if(!source.typeBounds)return [];
+    var frame=typeSourceFrame(artboardRect(preview),source),b=source.typeBounds;
+    return source.typeRects.map(function(r){return {x:frame.x+(r.x-b.x)*frame.unit,y:frame.y+(r.y-b.y)*frame.unit,w:r.w*frame.unit,h:r.h*frame.unit}});
+  }
+  function drawTypeGuides(){
+    if(!typeGuidesVisible)return;
+    if(state.inputMode!=='type'||state.composition!=='single')return;
+    var rect=typeScreenRects()[activeTypeLayer];if(!rect)return;
+    var ctx=preview.getContext('2d'),board=artboardRect(preview);ctx.save();ctx.beginPath();ctx.rect(board.x,board.y,board.w,board.h);ctx.clip();
+    ctx.strokeStyle='rgba(194,103,43,.7)';ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);ctx.setLineDash([]);
+    typeSnap.forEach(function(guide){ctx.beginPath();if(guide.axis==='x'){ctx.moveTo(guide.value,board.y);ctx.lineTo(guide.value,board.y+board.h)}else{ctx.moveTo(board.x,guide.value);ctx.lineTo(board.x+board.w,guide.value)}ctx.stroke()});ctx.restore();
+  }
+  function moveTypeLayer(e){
+    var p=canvasPoint(e),rect=typeDrag.rect,board=artboardRect(preview),frame=typeSourceFrame(board,sourceAt(0));
+    var cx=rect.x+rect.w/2+p.x-typeDrag.start.x,cy=rect.y+rect.h/2+p.y-typeDrag.start.y;
+    typeSnap=[];
+    if(!e.altKey){
+      var others=typeScreenRects().filter(function(_,index){return index!==activeTypeLayer});
+      ['x','y'].forEach(function(axis){
+        var span=axis==='x'?'w':'h',center=axis==='x'?cx:cy,size=rect[span],marks=[board[axis],board[axis]+board[span]/2,board[axis]+board[span]];
+        others.forEach(function(r){marks.push(r[axis],r[axis]+r[span]/2,r[axis]+r[span])});
+        var best=7*preview.width/preview.getBoundingClientRect().width,shift=0,guide=null;
+        marks.forEach(function(mark){[-size/2,0,size/2].forEach(function(offset){var d=mark-center-offset;if(Math.abs(d)<best){best=Math.abs(d);shift=d;guide=mark}})});
+        if(guide!==null){if(axis==='x')cx+=shift;else cy+=shift;typeSnap.push({axis:axis,value:guide})}
+      });
+    }
+    var layer=typeLayers[activeTypeLayer];layer.x=typeDrag.x+(cx-rect.x-rect.w/2)/frame.unit/10;layer.y=typeDrag.y+(cy-rect.y-rect.h/2)/frame.unit/10;
+    layer.x=Math.round(layer.x*100)/100;layer.y=Math.round(layer.y*100)/100;
+    requestTypeRender(true);
+  }
   function canvasPoint(e){var r=preview.getBoundingClientRect();return {x:(e.clientX-r.left)*preview.width/r.width,y:(e.clientY-r.top)*preview.height/r.height}}
   function mosaicRectAt(p){
     for(var i=lastMosaicRects.length-1;i>=0;i--){
@@ -2095,6 +2317,19 @@ body.pattern-mode .btn.pattern-action{display:flex}
   }
   function resizeAtPointer(e){
     var p=canvasPoint(e);
+    if(state.inputMode==='type'&&state.composition==='single'&&e.deltaY){
+      var rects=typeScreenRects();
+      for(var i=rects.length-1;i>=0;i--){
+        var rect=rects[i];
+        if(p.x<rect.x||p.x>rect.x+rect.w||p.y<rect.y||p.y>rect.y+rect.h)continue;
+        e.preventDefault();typeGuidesVisible=true;
+        if(i!==activeTypeLayer){saveTypeLayer();selectTypeLayer(i)}
+        var layer=typeLayers[i],step=Math.max(1,Math.round(layer.size*.05));
+        layer.size=clamp(layer.size+(e.deltaY<0?step:-step),1,1000);
+        requestTypeRender(true);
+        return;
+      }
+    }
     if(overlayRectAt(p)){
       e.preventDefault();
       state.overlayScale=clamp(state.overlayScale+(e.deltaY<0?8:-8),1,260);
@@ -2124,6 +2359,19 @@ body.pattern-mode .btn.pattern-action{display:flex}
   }
   function startStageDrag(e){
     var p=canvasPoint(e);
+    if(state.inputMode==='type'&&state.composition==='single'){
+      var board=artboardRect(preview);
+      if(p.x<board.x||p.x>board.x+board.w||p.y<board.y||p.y>board.y+board.h)return;
+    }
+    if(e.button===0&&state.inputMode==='type'&&state.composition==='single'){
+      var rects=typeScreenRects(),hit=-1;
+      for(var i=rects.length-1;i>=0;i--){var r=rects[i];if(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h){hit=i;break}}
+      if(hit>=0){
+        e.preventDefault();saveTypeLayer();selectTypeLayer(hit);
+        typeDrag={pointer:e.pointerId,start:p,x:typeLayers[hit].x,y:typeLayers[hit].y,rect:rects[hit]};
+        stage.setPointerCapture(e.pointerId);preview.style.cursor='move';return;
+      }
+    }
     if(overlayRectAt(p)){
       overlayDrag={
         pointer:e.pointerId,x:p.x,y:p.y,
@@ -2169,6 +2417,8 @@ body.pattern-mode .btn.pattern-action{display:flex}
     schedule(true);
   }
   function stopStageDrag(e){
+    if(typeDrag){typeDrag=null;typeSnap=[];preview.style.cursor='crosshair';if(stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);requestTypeRender(false);return}
+
     if(mosaicDrag){
       mosaicDrag=null; preview.style.cursor=state.composition==='mosaic'?'grab':'crosshair';
       if(stage.hasPointerCapture&&stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);
@@ -2199,8 +2449,18 @@ body.pattern-mode .btn.pattern-action{display:flex}
     updateValues();schedule(true);
   }
   function moveLight(e){var r=stage.getBoundingClientRect();state.angle=Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI);document.getElementById('angle').value=state.angle;updateValues();schedule(true)}
+  document.querySelectorAll('input[type=range]').forEach(function(el){
+    el.addEventListener('dblclick',function(){
+      if(el.disabled)return;
+      var preset=materials[state.material],value=Object.prototype.hasOwnProperty.call(preset,el.id)?preset[el.id]:sliderDefaults[el.id];
+      el.value=value;
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+  });
   document.getElementById('export').onclick=exportPng;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal(helpModal);if(licenseUnlocked)closeModal(licenseModal)}});
+  MaterialSurfaces.ready.then(function(){clearTextureCache();schedule()}).catch(function(error){console.error(error);setStatus('Material textures could not load. / 材质贴图加载失败。')});
+  document.getElementById('typeText').value=state.typeText;
   setupHelp();setupLicense();updateExportControls();createMaterials();applyLanguage();resizePreview();requestTypeRender(false);seed();new ResizeObserver(resizePreview).observe(stage);
 })();
 </script>
